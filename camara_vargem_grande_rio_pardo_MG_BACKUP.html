@@ -103,16 +103,6 @@ img{max-width:100%;display:block}
 /* .exit handled inline */
 @keyframes introFadeOut{to{opacity:0}}
 #intro.gone{display:none!important}
-/* CORREÇÃO URGENTE — remover tela inicial para acesso direto */
-#intro {
-  display: none !important;
-}
-
-#site {
-  opacity: 1 !important;
-  animation: none !important;
-}
-
 
 /* ── GRAIN TEXTURE ── */
 .intro-grain{
@@ -1150,6 +1140,7 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
       <button class="nav-link active" id="nl-home" onclick="nav('home')">In&#237;cio</button>
       <button class="nav-link" id="nl-institucional" onclick="nav('institucional')">Institucional</button>
       <button class="nav-link" id="nl-vereadores" onclick="nav('vereadores')">Vereadores</button>
+      <button class="nav-link" id="nl-legislacao" onclick="nav('legislacao')">Legisla&#231;&#227;o</button>
       <div class="nav-dd">
         <button class="nav-link" id="nl-transparencia" onclick="nav('transparencia')">Transpari&#234;ncia <span class="nav-dd-arrow">&#9660;</span></button>
         <div class="nav-dd-menu">
@@ -1164,14 +1155,12 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
           <div class="nav-dd-item" onclick="nav('transp-diarias')">&#9992;&#65039; Di&#225;rias de Viagem</div>
           <div class="nav-dd-item" onclick="nav('transp-convenios')">&#129309; Conv&#234;nios</div>
           <div class="nav-dd-item" onclick="nav('transp-concursos')">&#127891; Concursos P&#250;blicos</div>
-          <div class="nav-dd-item" onclick="nav('transp-faq')">&#10067; Perguntas Frequentes</div>
         </div></div>
       </div>
-      <button class="nav-link" id="nl-legislacao" onclick="nav('legislacao')">Legisla&#231;&#227;o</button>
-      <button class="nav-link" id="nl-diario" onclick="nav('diario')">Di&#225;rio Oficial</button>
       <button class="nav-link" id="nl-esic" onclick="nav('esic')">e-SIC</button>
       <button class="nav-link" id="nl-ouvidoria" onclick="nav('ouvidoria')">Ouvidoria</button>
-      <button class="nav-link" id="nl-contato" onclick="nav('contato')">Contato</button>
+      <button class="nav-link" id="nl-noticias" onclick="nav('noticias')">Not&#237;cias</button>
+      <button class="nav-link" id="nl-diario" onclick="nav('diario')">Di&#225;rio Oficial</button>
     </div>
     <button class="hamburger" id="hbg" onclick="toggleMenu()">
       <span></span><span></span><span></span>
@@ -1197,13 +1186,13 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
   <button class="mm-item" onclick="nav('transp-diarias');toggleMenu()">&#9992;&#65039; Di&#225;rias de Viagem</button>
   <button class="mm-item" onclick="nav('transp-convenios');toggleMenu()">&#129309; Conv&#234;nios</button>
   <button class="mm-item" onclick="nav('transp-concursos');toggleMenu()">&#127891; Concursos P&#250;blicos</button>
-  <button class="mm-item" onclick="nav('transp-faq');toggleMenu()">&#10067; Perguntas Frequentes</button>
   <div class="mm-divider"></div>
   <div class="mm-section">Cidad&#227;o</div>
   <button class="mm-item" onclick="nav('esic');toggleMenu()">&#128269; e-SIC &#8212; Acesso &#224; Informa&#231;&#227;o</button>
   <button class="mm-item" onclick="nav('ouvidoria');toggleMenu()">Ouvidoria Municipal</button>
   <div class="mm-divider"></div>
   <div class="mm-section">Informa&#231;&#245;es</div>
+  <button class="mm-item" onclick="nav('noticias');toggleMenu()">Not&#237;cias</button>
   <button class="mm-item" onclick="nav('diario');toggleMenu()">Di&#225;rio Oficial</button>
   <button class="mm-item" onclick="nav('contato');toggleMenu()">Contato</button>
 </div>
@@ -2164,19 +2153,6 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
 </div>
 </div>
 
-
-<div id="page-transp-faq" class="page">
-<div class="ih"><div class="ih-in">
-  <button class="ih-back" onclick="nav('transparencia')">&#8592; Portal da Transpari&#234;ncia</button>
-  <div class="ih-title">&#10067; <em>Perguntas</em> Frequentes</div>
-  <div class="ih-desc">Respostas r&#225;pidas sobre acesso &#224; informa&#231;&#227;o, transpar&#234;ncia e solicita&#231;&#245;es via e-SIC.</div>
-</div></div>
-<div class="pw"><div class="esic-info">
-<p><strong>Como solicitar informa&#231;&#245;es?</strong> Utilize o formul&#225;rio do e-SIC no menu principal.</p>
-<p><strong>Qual o prazo de resposta?</strong> At&#233; 20 dias, prorrog&#225;vel conforme a Lei n&#186; 12.527/2011.</p>
-<p><strong>Onde consultar di&#225;rias?</strong> Na se&#231;&#227;o Transpar&#234;ncia &gt; Di&#225;rias de Viagem.</p>
-</div></div></div>
-
 <div id="page-legislacao" class="page">
 <div class="pg-hero">
   <div class="pg-hero-inner">
@@ -2618,11 +2594,6 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
 
 </div>
 </div>
-
-
-<div id="page-checklist" class="page">
-<div class="ih"><div class="ih-in"><button class="ih-back" onclick="nav('transparencia')">&#8592; Voltar</button><div class="ih-title">CHECKLIST DE <em>ADEQUA&#199;&#195;O</em></div></div></div>
-<div class="pw"><div class="esic-info"><p>1. Aba Transpar&#234;ncia vis&#237;vel no menu principal &#8212; <strong>Conclu&#237;do</strong> &#8212; /transparencia</p><p>2. Texto explicativo sobre a LAI &#8212; <strong>Conclu&#237;do</strong> &#8212; /transparencia</p><p>3. Link para legisla&#231;&#227;o federal &#8212; <strong>Conclu&#237;do</strong> &#8212; /transparencia</p><p>4. Link para legisla&#231;&#227;o estadual &#8212; <strong>Conclu&#237;do</strong> &#8212; /transparencia</p><p>5. Portal da Transpar&#234;ncia &#8212; <strong>Pendente de link oficial do cliente</strong></p><p>6. Di&#225;rias &#8212; <strong>Estrutura criada</strong> &#8212; /transp-diarias</p><p>7. Licita&#231;&#245;es &#8212; <strong>Estrutura criada</strong> &#8212; /transp-licitacoes</p><p>8. Ouvidoria &#8212; <strong>Estrutura criada</strong> &#8212; /ouvidoria</p><p>9. e-SIC &#8212; <strong>Estrutura criada</strong> &#8212; /esic</p></div></div></div>
 
 <div id="page-contato" class="page">
 <div class="pg-hero">
