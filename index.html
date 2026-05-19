@@ -1153,17 +1153,19 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
       <div class="nav-dd">
         <button class="nav-link" id="nl-transparencia" onclick="nav('transparencia')">Transpari&#234;ncia <span class="nav-dd-arrow">&#9660;</span></button>
         <div class="nav-dd-menu">
-          <div class="nav-dd-item" onclick="nav('transparencia')">&#128202; Vis&#227;o Geral</div>
+          <div class="nav-dd-item" onclick="nav('transparencia')">&#128202; Portal da Transpari&#234;ncia</div>
           <div style="height:.5px;background:rgba(255,255,255,.08);margin:4px 6px"></div>
+          <div class="nav-dd-item" onclick="nav('transparencia')">&#128279; Portal da Transpari&#234;ncia</div>
           <div class="nav-dd-item" onclick="nav('transp-receitas')">&#128176; Receitas</div>
           <div class="nav-dd-item" onclick="nav('transp-despesas')">&#128228; Despesas</div>
           <div class="nav-dd-item" onclick="nav('transp-licitacoes')">&#128203; Licita&#231;&#245;es</div>
           <div class="nav-dd-item" onclick="nav('transp-contratos')">&#128221; Contratos</div>
           <div class="nav-dd-item" onclick="nav('transp-servidores')">&#128101; Servidores</div>
-          <div class="nav-dd-item" onclick="nav('transp-relatorios')">&#128202; Relat&#243;rios Fiscais</div>
+          <div class="nav-dd-item" onclick="nav('transp-folha-pagamento')">&#128196; Folha de Pagamento</div>
           <div class="nav-dd-item" onclick="nav('transp-diarias')">&#9992;&#65039; Di&#225;rias de Viagem</div>
           <div class="nav-dd-item" onclick="nav('transp-convenios')">&#129309; Conv&#234;nios</div>
           <div class="nav-dd-item" onclick="nav('transp-concursos')">&#127891; Concursos P&#250;blicos</div>
+          <div class="nav-dd-item" onclick="nav('transp-relatorios')">&#128202; Relat&#243;rios RREO/RGF</div>
           <div class="nav-dd-item" onclick="nav('transp-faq')">&#10067; Perguntas Frequentes</div>
         </div></div>
       </div>
@@ -1187,16 +1189,18 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
   <button class="mm-item" onclick="nav('legislacao');toggleMenu()">Legisla&#231;&#227;o</button>
   <div class="mm-divider"></div>
   <div class="mm-section">Transpari&#234;ncia</div>
-  <button class="mm-item" onclick="nav('transparencia');toggleMenu()">&#128202; Vis&#227;o Geral</button>
+  <button class="mm-item" onclick="nav('transparencia');toggleMenu()">&#128202; Portal da Transpari&#234;ncia</button>
+  <button class="mm-item" onclick="nav('transparencia');toggleMenu()">&#128279; Portal da Transpari&#234;ncia</button>
   <button class="mm-item" onclick="nav('transp-receitas');toggleMenu()">&#128176; Receitas</button>
   <button class="mm-item" onclick="nav('transp-despesas');toggleMenu()">&#128228; Despesas</button>
   <button class="mm-item" onclick="nav('transp-licitacoes');toggleMenu()">&#128203; Licita&#231;&#245;es</button>
   <button class="mm-item" onclick="nav('transp-contratos');toggleMenu()">&#128221; Contratos</button>
   <button class="mm-item" onclick="nav('transp-servidores');toggleMenu()">&#128101; Servidores</button>
-  <button class="mm-item" onclick="nav('transp-relatorios');toggleMenu()">&#128202; Relat&#243;rios Fiscais</button>
+  <button class="mm-item" onclick="nav('transp-folha-pagamento');toggleMenu()">&#128196; Folha de Pagamento</button>
   <button class="mm-item" onclick="nav('transp-diarias');toggleMenu()">&#9992;&#65039; Di&#225;rias de Viagem</button>
   <button class="mm-item" onclick="nav('transp-convenios');toggleMenu()">&#129309; Conv&#234;nios</button>
   <button class="mm-item" onclick="nav('transp-concursos');toggleMenu()">&#127891; Concursos P&#250;blicos</button>
+  <button class="mm-item" onclick="nav('transp-relatorios');toggleMenu()">&#128202; Relat&#243;rios RREO/RGF</button>
   <button class="mm-item" onclick="nav('transp-faq');toggleMenu()">&#10067; Perguntas Frequentes</button>
   <div class="mm-divider"></div>
   <div class="mm-section">Cidad&#227;o</div>
@@ -1596,6 +1600,22 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
     </div>
   </div>
 
+  <div style="margin-bottom:18px">
+    <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.25rem;color:var(--g800);margin-bottom:10px">Acessos em destaque</div>
+    <div class="tcat-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));margin-bottom:10px">
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128279; Portal da Transpar&#234;ncia</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/execucaoOrcamentaria/diarias/diarias.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#9992;&#65039; Di&#225;rias de Viagem</div></a>
+      <div class="tcat" onclick="nav('transp-folha-pagamento')"><div class="tcat-name">&#128196; Folha de Pagamento</div></div>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/recursosHumanos/recursosHumanos.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128101; Servidores e Remunera&#231;&#227;o</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/licitacoesContratacoesECompras/licitacoes/licitacoes.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128203; Licita&#231;&#245;es</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/execucaoOrcamentaria/receita/receita.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128176; Receitas</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/execucaoOrcamentaria/despesa/despesa.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128228; Despesas</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/licitacoesContratacoesECompras/contratosEAtas/contratosEAtas.xhtml?tipoContrato=1" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128221; Contratos</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/conveniosETransferencias/conveniosETransferencias.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#129309; Conv&#234;nios</div></a>
+      <a class="tcat" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/planejamentoEPrestacaoDeContas/lrf/lrf.xhtml" target="_blank" rel="noopener noreferrer"><div class="tcat-name">&#128202; Relat&#243;rios RREO/RGF</div></a>
+    </div>
+  </div>
+
   <!-- Grid de navegação para páginas individuais -->
   <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px">
     <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.1rem;color:var(--g800)">Selecione uma categoria</div>
@@ -1883,6 +1903,7 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
   <div class="ih-title">&#128101; <em>Servidores</em> e Remunera&#231;&#227;o</div>
   <div class="ih-desc">Quadro funcional, subs&#237;dios, aux&#237;lios, verbas indenizat&#243;rias e diferenciais remunerativos &#8212; c.6 da LAI 12.527/2011</div>
   <div class="ih-pills"><span class="ih-pill ih-pill-g">c.6 &#8212; LAI</span><span class="ih-pill">LRF Art. 55 III</span><span class="ih-pill">C&#226;mara Municipal &#8212; MG</span></div>
+  <div style="margin-top:14px"><strong>Folha de Pagamento</strong> &nbsp;<button class="btn btn-outline" onclick="nav('transp-folha-pagamento')">Abrir se&#231;&#227;o</button></div>
 </div></div>
 <div class="pw">
   <div class="info-box info-box-gold"><span class="info-box-ico">&#128196;</span>
@@ -1999,6 +2020,23 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
 </div>
 </div>
 
+<div id="page-transp-folha-pagamento" class="page">
+<div class="ih"><div class="ih-in">
+  <button class="ih-back" onclick="nav('transparencia')">&#8592; Portal da Transpari&#234;ncia</button>
+  <div class="ih-title">&#128196; <em>Folha de Pagamento</em></div>
+  <div class="ih-desc">A C&#226;mara Municipal disponibiliza nesta se&#231;&#227;o as informa&#231;&#245;es referentes &#224; folha de pagamento, remunera&#231;&#227;o de servidores, agentes pol&#237;ticos, subs&#237;dios, verbas indenizat&#243;rias, aux&#237;lios, ajudas de custo e demais despesas com pessoal, conforme as normas de transpar&#234;ncia p&#250;blica e a Lei de Acesso &#224; Informa&#231;&#227;o.</div>
+</div></div>
+<div class="pw">
+  <div class="tcat-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+    <div class="tcat"><div class="tcat-name">Servidores efetivos</div></div><div class="tcat"><div class="tcat-name">Servidores comissionados</div></div>
+    <div class="tcat"><div class="tcat-name">Agentes pol&#237;ticos / vereadores</div></div><div class="tcat"><div class="tcat-name">Subs&#237;dios</div></div>
+    <div class="tcat"><div class="tcat-name">Verbas indenizat&#243;rias</div></div><div class="tcat"><div class="tcat-name">Aux&#237;lios e ajudas de custo</div></div>
+    <div class="tcat"><div class="tcat-name">Relat&#243;rio mensal de despesa com pessoal</div></div><div class="tcat"><div class="tcat-name">Arquivos de folha de pagamento</div></div>
+  </div>
+  <div style="margin-top:18px"><a class="btn btn-green" href="https://cmvargemgrandedoriopardo.cidadesmg.com.br/portaltransparencia/publica/recursosHumanos/recursosHumanos.xhtml" target="_blank" rel="noopener noreferrer">Consultar Folha de Pagamento</a></div>
+</div>
+</div>
+
 <div id="page-transp-relatorios" class="page">
 <div class="ih"><div class="ih-in">
   <button class="ih-back" onclick="nav('transparencia')">&#8592; Portal da Transpari&#234;ncia</button>
@@ -2044,8 +2082,8 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
 <div id="page-transp-diarias" class="page">
 <div class="ih"><div class="ih-in">
   <button class="ih-back" onclick="nav('transparencia')">&#8592; Portal da Transpari&#234;ncia</button>
-  <div class="ih-title">&#9992;&#65039; <em>Di&#225;rias</em> de Viagem</div>
-  <div class="ih-desc">Informa&#231;&#245;es sobre concess&#227;o de di&#225;rias a vereadores e servidores conforme c.7 da LAI 12.527/2011</div>
+  <div class="ih-title"><em>Di&#225;rias de Viagem</em></div>
+  <div class="ih-desc">Esta se&#231;&#227;o apresenta benefici&#225;rio, cargo/fun&#231;&#227;o, destino, atividade, per&#237;odo, n&#250;mero de di&#225;rias, valor unit&#225;rio, valor total e base legal das di&#225;rias de viagem.</div>
   <div class="ih-pills"><span class="ih-pill ih-pill-g">c.7 &#8212; LAI</span><span class="ih-pill">Art. 8&#186; &#167;1&#186; VI</span><span class="ih-pill">C&#226;mara Municipal &#8212; MG</span></div>
 </div></div>
 <div class="pw">
