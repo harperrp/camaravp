@@ -2927,6 +2927,10 @@ function initRV(){
 initRV();
 camRenderLeis();
 camSyncAdminVisibility();
+ codex/improve-law-management-workflow-xv3q63
+
+if((location.hash||'').replace('#','').trim()==='admin-leis'&&!camIsAdmin()){ camAdminLogin(); }
+ main
 
 // HASH ROUTING
 function openFromHash(){
@@ -3170,7 +3174,11 @@ function camApplyFilters(){
   });
 }
 var CAM_UNSAVED=false; var CAM_EDIT_IDX=null;
+ codex/improve-law-management-workflow-xv3q63
 function camIsAdmin(){ return false; } // protótipo frontend: acesso administrativo desativado em produção pública
+
+function camIsAdmin(){ return sessionStorage.getItem('cam_admin_ok')==='1'; }
+ main
 function camSyncAdminVisibility(){
   var adminPanel=document.getElementById('cam-admin-painel');
   if(adminPanel) adminPanel.style.display=camIsAdmin()?'block':'none';
@@ -3180,13 +3188,27 @@ function camSyncAdminVisibility(){
   if(ano) ano.style.display=camIsAdmin()?'':'none';
 }
 function camAdminLogin(){
+ codex/improve-law-management-workflow-xv3q63
   alert('Painel administrativo em modo protótipo frontend. Produção exige backend com login/autenticação real.');
+
+  var pwd=prompt('Acesso administrativo: informe a senha.');
+  if(pwd==='camara-admin-2026'){
+    sessionStorage.setItem('cam_admin_ok','1');
+    camSyncAdminVisibility();
+    camRenderLeis();
+    alert('Acesso administrativo liberado nesta sessão.');
+  } else {
+    alert('Acesso negado.');
+  }
+ main
 }
 function camMarkUnsaved(){CAM_UNSAVED=true;}
 window.addEventListener('beforeunload',function(e){if(CAM_UNSAVED){e.preventDefault();e.returnValue='';}});
 function camSetFeedback(t,c){var el=document.getElementById('cam-admin-feedback'); if(el){el.textContent=t; el.style.color=c||'var(--cinza-m)';}}
 function camHandlePdfUpload(ev){var f=ev.target.files&&ev.target.files[0]; if(!f)return; camSetFeedback('Processando PDF...','var(--verde)'); setTimeout(function(){document.getElementById('cam-form-num').value=(f.name.match(/\d+\/\d+/)||[''])[0]; document.getElementById('cam-form-data').value=new Date().toLocaleDateString('pt-BR'); document.getElementById('cam-form-tipo').value='Lei Ordinária'; document.getElementById('cam-form-ementa').value='Ementa extraída automaticamente de '+f.name; document.getElementById('cam-form-artigos').value='Art. 1º Texto extraído (simulado).'; CAM_UNSAVED=true; camSetFeedback('PDF processado com sucesso. Revise os campos antes de publicar.','#1a6a1a');},1200);}
 function camToggleBtn(btn,on,label){if(!btn)return; if(on){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent='⏳ '+label;}else{btn.disabled=false;btn.textContent=btn.dataset.lbl||btn.textContent;}}
+
+ codex/improve-law-management-workflow-xv3q63
 function camReadForm(){
   var numEl=document.getElementById('cam-form-num');
   var dataEl=document.getElementById('cam-form-data');
@@ -3202,6 +3224,9 @@ function camReadForm(){
     texto:(artigosEl&&artigosEl.value||'').trim()
   };
 }
+
+function camReadForm(){return {num:cam_form_num.value,data:cam_form_data.value,tipo:cam_form_tipo.value,ementa:cam_form_ementa.value,artigos:[{art:'Art. 1º',texto:cam_form_artigos.value}],texto:cam_form_artigos.value};}
+ main
 function camSaveLei(status,btn){var d=camReadForm(); if(!d.num||!d.data||!d.tipo||!d.ementa){camSetFeedback('Erro ao salvar: preencha campos obrigatórios.','#a32d2d'); return;} camToggleBtn(btn,true,'salvando'); camSetFeedback('Salvando...','var(--verde)'); setTimeout(function(){d.sit=status; if(CAM_EDIT_IDX===null){CAM_LEIS.unshift(d);}else{CAM_LEIS[CAM_EDIT_IDX]=Object.assign(CAM_LEIS[CAM_EDIT_IDX],d); CAM_EDIT_IDX=null;} camRenderLeis(); CAM_UNSAVED=false; camToggleBtn(btn,false); camSetFeedback(status==='Publicado'?'Publicado com sucesso!':'Salvo com sucesso!','#1a6a1a');},900);}
 function camPreviewAdmin(){var d=camReadForm(); alert('PREVIEW\n'+d.tipo+' '+d.num+'\n'+d.ementa+'\n\n'+d.texto);}
 function camCancelEdit(){if(CAM_UNSAVED&&!confirm('Existem alterações não salvas. Deseja cancelar a edição?'))return; ['cam-form-num','cam-form-data','cam-form-tipo','cam-form-ementa','cam-form-artigos'].forEach(id=>document.getElementById(id).value=''); CAM_UNSAVED=false; CAM_EDIT_IDX=null; camSetFeedback('Edição cancelada.');}
