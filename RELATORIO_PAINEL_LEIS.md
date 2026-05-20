@@ -42,12 +42,10 @@
 - O bloco `#cam-admin-painel` fica oculto por padrão no carregamento público.
 - O conteúdo público da legislação exibe apenas leis com status **Publicado** para visitantes.
 - Filtros administrativos de status/ano também ficam ocultos para visitante público.
- codex/improve-law-management-workflow-xv3q63
 - O painel administrativo foi mantido como **protótipo frontend** e está **desativado para produção pública** (sem liberação por hash/senha no cliente).
 - Não há senha hardcoded no frontend.
 - Sem backend com login real/autorização/auditoria, não há exibição pública de botões de cadastrar/editar/excluir/arquivar/publicar.
 - Requisito de produção: autenticação real no backend, sessão segura, controle de perfil e trilha de auditoria.
 
-- A área administrativa só é liberada em sessão via hash `#admin-leis` + autenticação por senha da sessão (`sessionStorage`).
-- Sem autenticação administrativa, não há exibição pública de botões de cadastrar/editar/excluir/arquivar/publicar.
- main
+
+- O painel administrativo permanece desabilitado em produção até existir backend seguro com autenticação real.
