@@ -2233,15 +2233,38 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
     <div><strong style="color:var(--verde)">Como funciona:</strong> clique em "Ver Ato" para acessar o texto completo do instrumento normativo. Para solicitar c&#xF3;pia f&#xED;sica ou autenticada, utilize o <span onclick="nav('esic')" style="color:var(--verde-m);font-weight:700;cursor:pointer;text-decoration:underline">canal e-SIC / Ouvidoria</span>.</div>
   </div>
 
+  <div id="cam-admin-painel" style="display:none;margin-bottom:20px;border:1px solid rgba(26,71,49,.18);border-radius:6px;overflow:hidden;background:#fff">
+    <div style="background:linear-gradient(135deg,var(--verde),var(--verde-m));padding:12px 18px;color:#fff;font-weight:700;font-size:13px">🛠️ Painel administrativo de leis</div>
+    <div style="padding:14px 18px;display:grid;gap:10px">
+      <input id="cam-upload-pdf" type="file" accept="application/pdf" onchange="camHandlePdfUpload(event)" style="font-size:12px">
+      <div id="cam-admin-feedback" style="font-size:12px;color:var(--cinza-m)">Aguardando upload de PDF para iniciar cadastro.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px">
+        <input id="cam-form-num" placeholder="Número da lei *" oninput="camMarkUnsaved()" style="padding:8px;border:1px solid var(--border-m);border-radius:4px">
+        <input id="cam-form-data" placeholder="Data (dd/mm/aaaa) *" oninput="camMarkUnsaved()" style="padding:8px;border:1px solid var(--border-m);border-radius:4px">
+        <input id="cam-form-tipo" placeholder="Tipo da lei *" oninput="camMarkUnsaved()" style="padding:8px;border:1px solid var(--border-m);border-radius:4px">
+      </div>
+      <textarea id="cam-form-ementa" placeholder="Ementa *" oninput="camMarkUnsaved()" rows="2" style="padding:8px;border:1px solid var(--border-m);border-radius:4px"></textarea>
+      <textarea id="cam-form-artigos" placeholder="Artigos extraídos/edite manualmente" oninput="camMarkUnsaved()" rows="5" style="padding:8px;border:1px solid var(--border-m);border-radius:4px"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="cam-btn-preview" onclick="camPreviewAdmin()" class="btn btn-outline">Preview</button>
+        <button id="cam-btn-draft" onclick="camSaveLei('Rascunho', this)" class="btn btn-green">Salvar rascunho</button>
+        <button id="cam-btn-review" onclick="camSaveLei('Pendente de Revisão', this)" class="btn btn-outline">Pendente revisão</button>
+        <button id="cam-btn-publish" onclick="camSaveLei('Publicado', this)" class="btn btn-gold">Publicar</button>
+        <button id="cam-btn-cancel" onclick="camCancelEdit()" class="btn btn-outline">Cancelar edição</button>
+        <button id="cam-btn-archive" onclick="camArchiveLei()" class="btn btn-outline">Arquivar</button>
+        <button id="cam-btn-delete" onclick="camDeleteLei()" class="btn btn-outline" style="color:#a32d2d;border-color:#f3b5b5">Excluir</button>
+      </div>
+    </div>
+  </div>
   <!-- BARRA DE BUSCA E FILTROS -->
   <div style="border:1px solid rgba(26,71,49,.12);border-radius:4px;overflow:hidden;margin-bottom:20px">
     <div style="background:linear-gradient(135deg,var(--verde),var(--verde-m));padding:12px 18px">
       <div style="color:#fff;font-weight:700;font-size:13px;letter-spacing:.05em">&#x2696;&#xFE0F; Pesquisar na Legisla&#xE7;&#xE3;o da C&#xE2;mara Municipal</div>
     </div>
     <div style="padding:14px 18px;background:#fff;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <input type="text" placeholder="Buscar por n&#xFA;mero, ano ou ementa..." id="cam-lei-search" oninput="camFilterBusca(this.value)"
+      <input type="text" placeholder="Buscar por n&#xFA;mero, ano ou ementa..." id="cam-lei-search" oninput="camApplyFilters()"
         style="flex:1;min-width:240px;background:var(--creme);border:1px solid rgba(26,71,49,.2);border-radius:4px;padding:8px 14px;font-size:13px;color:var(--cinza);outline:none;font-family:inherit">
-      <select id="cam-lei-tipo" onchange="camFilterTipo(this.value)"
+      <select id="cam-lei-tipo" onchange="camApplyFilters()"
         style="background:var(--creme);border:1px solid rgba(26,71,49,.2);border-radius:4px;padding:8px 12px;font-size:13px;color:var(--cinza);font-family:inherit;outline:none">
         <option value="">Todos os tipos</option>
         <option value="Lei Ordin&#xE1;ria">Lei Ordin&#xE1;ria</option>
@@ -2250,12 +2273,11 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
         <option value="Resolu&#xE7;&#xE3;o">Resolu&#xE7;&#xE3;o</option>
         <option value="Emenda &#xE0; Lei Org&#xE2;nica">Emenda &#xE0; Lei Org&#xE2;nica</option>
       </select>
-      <select id="cam-lei-sit" onchange="camFilterSit(this.value)"
+      <select id="cam-lei-ano" onchange="camApplyFilters()" style="background:var(--creme);border:1px solid rgba(26,71,49,.2);border-radius:4px;padding:8px 12px;font-size:13px;color:var(--cinza);font-family:inherit;outline:none"><option value="">Todos os anos</option></select>
+      <select id="cam-lei-sit" onchange="camApplyFilters()"
         style="background:var(--creme);border:1px solid rgba(26,71,49,.2);border-radius:4px;padding:8px 12px;font-size:13px;color:var(--cinza);font-family:inherit;outline:none">
         <option value="">Todos os status</option>
-        <option value="Vigente">Vigente</option>
-        <option value="Revogada">Revogada</option>
-        <option value="Alterada">Alterada</option>
+        <option value="Rascunho">Rascunho</option><option value="Publicado">Publicado</option><option value="Pendente de Revisão">Pendente de Revisão</option><option value="Arquivado">Arquivado</option>
       </select>
     </div>
   </div>
@@ -2280,7 +2302,7 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
             <th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:#fff">Texto</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="cam-lei-tbody">
           <tr data-tipo="Lei Ordin&#xE1;ria" data-sit="Vigente" style="border-bottom:.5px solid var(--cinza-c)">
             <td style="padding:10px 14px"><span style="font-weight:700;color:var(--verde);font-family:monospace">023/2025</span></td>
             <td style="padding:10px 14px"><span style="font-size:11px;font-weight:700;color:var(--verde)">Lei Ordin&#xE1;ria</span></td>
@@ -2863,6 +2885,7 @@ function nav(id,opts){
   }
   window.scrollTo({top:0,behavior: opts.instant ? 'auto' : 'smooth'});
   setTimeout(initRV,50);
+  camSyncAdminVisibility();
 }
 // backward compat
 function showPage(id){nav(id);}
@@ -2902,6 +2925,8 @@ function initRV(){
   document.querySelectorAll('.sec-divider').forEach(function(el){ro2.observe(el);});
 }
 initRV();
+camRenderLeis();
+camSyncAdminVisibility();
 
 // HASH ROUTING
 function openFromHash(){
@@ -2923,7 +2948,7 @@ new IntersectionObserver(function(e){
 // LEG FUNCTIONS
 // ===== CAMARA - LEGISLACAO =====
 var CAM_LEIS = [
-  {num:"023/2025",tipo:"Lei Ordin\u00E1ria",data:"22/04/2025",sit:"Vigente",
+  {num:"023/2025",tipo:"Lei Ordin\u00E1ria",data:"22/04/2025",sit:"Publicado",
    ementa:"Disp\u00F5e sobre a Lei Or\u00E7ament\u00E1ria Anual (LOA) da C\u00E2mara Municipal para o exerc\u00EDcio de 2025.",
    artigos:[
     {art:"Art. 1\u00BA",texto:"Fica aprovada a Lei Or\u00E7ament\u00E1ria Anual da C\u00E2mara Municipal de Vargem Grande do Rio Pardo para o exerc\u00EDcio financeiro de 2025, no valor total de R$ 0,00 (a preencher)."},
@@ -2931,14 +2956,14 @@ var CAM_LEIS = [
     {art:"Art. 3\u00BA",texto:"As dota\u00E7\u00F5es previstas nesta Lei poder\u00E3o ser alteradas por cr\u00E9ditos adicionais, na forma da legisla\u00E7\u00E3o vigente."},
     {art:"Art. 4\u00BA",texto:"Esta Lei entra em vigor na data de sua publica\u00E7\u00E3o.\n\nVargem Grande do Rio Pardo, 22 de abril de 2025.\n\n[Nome do Presidente]\nPresidente da C\u00E2mara Municipal"}
    ]},
-  {num:"012/2025",tipo:"Resolu\u00E7\u00E3o",data:"01/03/2025",sit:"Vigente",
+  {num:"012/2025",tipo:"Resolu\u00E7\u00E3o",data:"01/03/2025",sit:"Publicado",
    ementa:"Fixa os subs\u00EDdios dos Vereadores e da Mesa Diretora para a legislatura 2025\u20132028.",
    artigos:[
     {art:"Art. 1\u00BA",texto:"Ficam fixados os subs\u00EDdios dos membros da C\u00E2mara Municipal de Vargem Grande do Rio Pardo para a legislatura 2025\u20132028, nos seguintes valores:\nI \u2013 Vereadores: R$ 0,00 mensais;\nII \u2013 Presidente da Mesa Diretora: R$ 0,00 mensais;\nIII \u2013 Vice-Presidentes: R$ 0,00 mensais."},
     {art:"Art. 2\u00BA",texto:"Os subs\u00EDdios fixados nesta Resolu\u00E7\u00E3o s\u00E3o compat\u00EDveis com o limite estabelecido pela Emenda Constitucional e com a receita corrente l\u00EDquida do Munic\u00EDpio."},
     {art:"Art. 3\u00BA",texto:"Esta Resolu\u00E7\u00E3o entra em vigor na data de sua publica\u00E7\u00E3o.\n\nVargem Grande do Rio Pardo, 01 de mar\u00E7o de 2025.\n\n[Nome do Presidente]\nPresidente da C\u00E2mara Municipal"}
    ]},
-  {num:"008/2021",tipo:"Lei Complementar",data:"10/12/2021",sit:"Vigente",
+  {num:"008/2021",tipo:"Lei Complementar",data:"10/12/2021",sit:"Publicado",
    ementa:"Disp\u00F5e sobre o Regimento Interno da C\u00E2mara Municipal de Vargem Grande do Rio Pardo \u2014 MG.",
    artigos:[
     {art:"Art. 1\u00BA",texto:"Este Regimento Interno disciplina o funcionamento da C\u00E2mara Municipal de Vargem Grande do Rio Pardo, nos termos da Constitui\u00E7\u00E3o Federal, da Constitui\u00E7\u00E3o do Estado de Minas Gerais e da Lei Org\u00E2nica Municipal."},
@@ -2947,7 +2972,7 @@ var CAM_LEIS = [
     {art:"Art. 4\u00BA",texto:"A Mesa Diretora \u00E9 composta por Presidente, 1\u00BA Vice-Presidente, 2\u00BA Vice-Presidente e 1\u00BA Secret\u00E1rio, eleitos pelos Vereadores para mandato de dois anos."},
     {art:"Art. 5\u00BA",texto:"Este Regimento Interno entra em vigor na data de sua publica\u00E7\u00E3o, revogando-se o Regimento anterior.\n\nVargem Grande do Rio Pardo, 10 de dezembro de 2021.\n\n[Nome do Presidente]\nPresidente da C\u00E2mara Municipal"}
    ]},
-  {num:"018/2022",tipo:"Lei Ordin\u00E1ria",data:"15/01/2022",sit:"Alterada",
+  {num:"018/2022",tipo:"Lei Ordin\u00E1ria",data:"15/01/2022",sit:"Publicado",
    alteradaPor:"Lei Ordin\u00E1ria n.\u00BA 021/2023",dataAlteracao:"12/04/2023",
    ementa:"Institui o Plano Plurianual \u2013 PPA para o per\u00EDodo 2022\u20132025 no \u00E2mbito do Poder Legislativo Municipal.",
    artigos:[
@@ -2959,10 +2984,10 @@ var CAM_LEIS = [
      alteradoPor:"Lei Ordin\u00E1ria n.\u00BA 021/2023, 12/04/2023"},
     {art:"Art. 4\u00BA",texto:"Esta Lei entra em vigor na data de sua publica\u00E7\u00E3o.\n\nVargem Grande do Rio Pardo, 15 de janeiro de 2022.\n\n[Nome do Presidente]\nPresidente da C\u00E2mara Municipal"}
    ]},
-  {num:"003/2024",tipo:"Emenda \u00E0 Lei Org\u00E2nica",data:"10/02/2024",sit:"Vigente",
+  {num:"003/2024",tipo:"Emenda \u00E0 Lei Org\u00E2nica",data:"10/02/2024",sit:"Publicado",
    ementa:"Altera dispositivos da Lei Org\u00E2nica Municipal relativos \u00E0s compet\u00EAncias legislativas da C\u00E2mara.",
    texto:'EMENDA \u00C0 LEI ORG\u00C2NICA N\u00BA 003/2024\n\nO PRESIDENTE DA C\u00C2MARA MUNICIPAL DE VARGEM GRANDE DO RIO PARDO,\nno uso das atribui\u00E7\u00F5es que lhe confere a Lei Org\u00E2nica Municipal,\n\nFAZ SABER que a C\u00E2mara Municipal aprovou e promulga a seguinte Emenda:\n\nArt. 1\u00BA O art. 32 da Lei Org\u00E2nica Municipal passa a vigorar com a seguinte reda\u00E7\u00E3o:\n"Art. 32. A C\u00E2mara Municipal reunir-se-\u00E1 em sess\u00F5es ordin\u00E1rias, extraordin\u00E1rias e solenes,\nna forma estabelecida no Regimento Interno."\n\nArt. 2\u00BA Esta Emenda \u00E0 Lei Org\u00E2nica entra em vigor na data de sua publica\u00E7\u00E3o.\n\nVargem Grande do Rio Pardo, 10 de fevereiro de 2024.\n\n[Nome do Presidente]\nPresidente da C\u00E2mara Municipal'},
-  {num:"005/2019",tipo:"Decreto Legislativo",data:"10/06/2019",sit:"Revogada",
+  {num:"005/2019",tipo:"Decreto Legislativo",data:"10/06/2019",sit:"Arquivado",
    ementa:"Estabelecia o calend\u00E1rio de sess\u00F5es ordin\u00E1rias da C\u00E2mara. REVOGADO pelo Decreto Legislativo n.\u00BA 009/2021.",
    texto:'\u26A0\uFE0F ATEN\u00C7\u00C3O: Este instrumento est\u00E1 REVOGADO.\nRevogado pelo Decreto Legislativo n.\u00BA 009/2021, de 08/03/2021.\n\nArt. 1\u00BA (Revogado) As sess\u00F5es ordin\u00E1rias da C\u00E2mara ocorriam \u00E0s quartas-feiras \u00E0s 18h.\n\nArt. 2\u00BA (Revogado) O calend\u00E1rio anual de sess\u00F5es seria aprovado na primeira sess\u00E3o de cada ano.\n\nArt. 3\u00BA Este Decreto Legislativo entrou em vigor na data de sua publica\u00E7\u00E3o.\n\nNota: Para o calend\u00E1rio e hor\u00E1rio vigente, consultar a Resolu\u00E7\u00E3o n.\u00BA 008/2021.\n\nVargem Grande do Rio Pardo, 10 de junho de 2019.\n\n[Nome do Presidente]\nPresidente da C\u00E2mara Municipal'}
 ];
@@ -2984,8 +3009,13 @@ function camFilterSit(v){
   });
 }
 
+function camGetVisibleLeis(){
+  return camIsAdmin() ? CAM_LEIS : CAM_LEIS.filter(function(l){ return l.sit==="Publicado"; });
+}
 function camOpenLei(idx){
-  var lei=CAM_LEIS[idx]; if(!lei)return;
+  var vis=camGetVisibleLeis();
+  var lei=vis[idx]; if(!lei)return;
+  var realIdx=CAM_LEIS.indexOf(lei);
   var sitC={Vigente:"#2ecc40",Alterada:"#e67e22",Revogada:"#f85149"};
   var sitBg={Vigente:"rgba(46,204,64,.15)",Alterada:"rgba(230,126,34,.15)",Revogada:"rgba(248,81,73,.15)"};
   var extra=lei.alteradaPor?" \u2014 "+lei.alteradaPor:"";
@@ -3035,7 +3065,15 @@ function camOpenLei(idx){
 
   mo.style.display="block";
   document.body.style.overflow="hidden";
-  window._camLeiAtual=lei;
+  window._camLeiAtual=lei; CAM_EDIT_IDX=realIdx;
+  if(camIsAdmin()){
+    camSetFeedback("Lei carregada para edição.","var(--verde)");
+    document.getElementById("cam-form-num").value=lei.num;
+    document.getElementById("cam-form-data").value=lei.data;
+    document.getElementById("cam-form-tipo").value=lei.tipo;
+    document.getElementById("cam-form-ementa").value=lei.ementa;
+    document.getElementById("cam-form-artigos").value=(lei.artigos||[]).map(function(a){return (a.art||"")+" "+(a.textoNovo||a.texto||"");}).join("\n\n")||lei.texto||"";
+  }
 }
 
 function camCloseLei(){
@@ -3098,6 +3136,78 @@ function camExportarLeis(){
 function camFilterBusca(v){v=v.toLowerCase();document.querySelectorAll('#cam-lei-table tbody tr').forEach(function(r){r.style.display=(!v||r.textContent.toLowerCase().includes(v))?'':'none';});}
 function camFilterTipo(v){document.querySelectorAll('#cam-lei-table tbody tr').forEach(function(r){r.style.display=(!v||r.getAttribute('data-tipo')===v)?'':'none';});}
 function camFilterSit(v){document.querySelectorAll('#cam-lei-table tbody tr').forEach(function(r){r.style.display=(!v||r.getAttribute('data-sit')===v)?'':'none';});}
+
+function camRenderLeis(){
+  var tb=document.getElementById('cam-lei-tbody'); if(!tb)return;
+  var vis=camGetVisibleLeis();
+  tb.innerHTML=vis.map(function(l,i){
+    return '<tr data-idx="'+i+'" data-tipo="'+l.tipo+'" data-sit="'+l.sit+'" data-ano="'+(l.data.split('/')[2]||'')+'" style="border-bottom:.5px solid var(--cinza-c)">'+
+      '<td style="padding:10px 14px"><span style="font-weight:700;color:var(--verde);font-family:monospace">'+l.num+'</span></td>'+
+      '<td style="padding:10px 14px"><span style="font-size:11px;font-weight:700;color:var(--verde)">'+l.tipo+'</span></td>'+
+      '<td style="padding:10px 14px;white-space:nowrap;font-size:13px">'+l.data+'</td>'+
+      '<td style="padding:10px 14px;font-size:12.5px;color:var(--cinza-m)">'+l.ementa+'</td>'+
+      '<td style="padding:10px 14px"><span style="font-size:11px;font-weight:700">'+l.sit+'</span></td>'+
+      '<td style="padding:10px 14px"><button onclick="camOpenLei('+i+')" style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,var(--verde),var(--verde-m));color:#fff;border:none;padding:7px 14px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">📄 Ver Ato</button></td></tr>';
+  }).join('');
+  var anos=[...new Set(vis.map(function(l){return (l.data.split('/')[2]||'');}))].filter(Boolean).sort().reverse();
+  var sel=document.getElementById('cam-lei-ano'); if(sel){ sel.innerHTML='<option value="">Todos os anos</option>'+anos.map(a=>'<option>'+a+'</option>').join(''); }
+  camApplyFilters();
+}
+function camApplyFilters(){
+  if(!camIsAdmin()){
+    document.querySelectorAll('#cam-lei-table tbody tr').forEach(function(r){ r.style.display=''; });
+    return;
+  }
+  var q=(document.getElementById('cam-lei-search')||{}).value?.toLowerCase()||'';
+  var tp=(document.getElementById('cam-lei-tipo')||{}).value||'';
+  var st=(document.getElementById('cam-lei-sit')||{}).value||'';
+  var an=(document.getElementById('cam-lei-ano')||{}).value||'';
+  document.querySelectorAll('#cam-lei-table tbody tr').forEach(function(r){
+    var l=camGetVisibleLeis()[+r.getAttribute('data-idx')]||{};
+    var full=((l.num||'')+' '+(l.ementa||'')+' '+(l.texto||'')+' '+(l.artigos||[]).map(a=>(a.art||'')+' '+(a.textoNovo||a.texto||'')).join(' ')).toLowerCase();
+    var ok=(!q||full.includes(q))&&(!tp||r.dataset.tipo===tp)&&(!st||r.dataset.sit===st)&&(!an||r.dataset.ano===an);
+    r.style.display=ok?'':'none';
+  });
+}
+var CAM_UNSAVED=false; var CAM_EDIT_IDX=null;
+function camIsAdmin(){ return false; } // protótipo frontend: acesso administrativo desativado em produção pública
+function camSyncAdminVisibility(){
+  var adminPanel=document.getElementById('cam-admin-painel');
+  if(adminPanel) adminPanel.style.display=camIsAdmin()?'block':'none';
+  var sit=document.getElementById('cam-lei-sit');
+  if(sit) sit.style.display=camIsAdmin()?'':'none';
+  var ano=document.getElementById('cam-lei-ano');
+  if(ano) ano.style.display=camIsAdmin()?'':'none';
+}
+function camAdminLogin(){
+  alert('Painel administrativo em modo protótipo frontend. Produção exige backend com login/autenticação real.');
+}
+function camMarkUnsaved(){CAM_UNSAVED=true;}
+window.addEventListener('beforeunload',function(e){if(CAM_UNSAVED){e.preventDefault();e.returnValue='';}});
+function camSetFeedback(t,c){var el=document.getElementById('cam-admin-feedback'); if(el){el.textContent=t; el.style.color=c||'var(--cinza-m)';}}
+function camHandlePdfUpload(ev){var f=ev.target.files&&ev.target.files[0]; if(!f)return; camSetFeedback('Processando PDF...','var(--verde)'); setTimeout(function(){document.getElementById('cam-form-num').value=(f.name.match(/\d+\/\d+/)||[''])[0]; document.getElementById('cam-form-data').value=new Date().toLocaleDateString('pt-BR'); document.getElementById('cam-form-tipo').value='Lei Ordinária'; document.getElementById('cam-form-ementa').value='Ementa extraída automaticamente de '+f.name; document.getElementById('cam-form-artigos').value='Art. 1º Texto extraído (simulado).'; CAM_UNSAVED=true; camSetFeedback('PDF processado com sucesso. Revise os campos antes de publicar.','#1a6a1a');},1200);}
+function camToggleBtn(btn,on,label){if(!btn)return; if(on){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent='⏳ '+label;}else{btn.disabled=false;btn.textContent=btn.dataset.lbl||btn.textContent;}}
+function camReadForm(){
+  var numEl=document.getElementById('cam-form-num');
+  var dataEl=document.getElementById('cam-form-data');
+  var tipoEl=document.getElementById('cam-form-tipo');
+  var ementaEl=document.getElementById('cam-form-ementa');
+  var artigosEl=document.getElementById('cam-form-artigos');
+  return {
+    num:(numEl&&numEl.value||'').trim(),
+    data:(dataEl&&dataEl.value||'').trim(),
+    tipo:(tipoEl&&tipoEl.value||'').trim(),
+    ementa:(ementaEl&&ementaEl.value||'').trim(),
+    artigos:[{art:'Art. 1º',texto:(artigosEl&&artigosEl.value||'').trim()}],
+    texto:(artigosEl&&artigosEl.value||'').trim()
+  };
+}
+function camSaveLei(status,btn){var d=camReadForm(); if(!d.num||!d.data||!d.tipo||!d.ementa){camSetFeedback('Erro ao salvar: preencha campos obrigatórios.','#a32d2d'); return;} camToggleBtn(btn,true,'salvando'); camSetFeedback('Salvando...','var(--verde)'); setTimeout(function(){d.sit=status; if(CAM_EDIT_IDX===null){CAM_LEIS.unshift(d);}else{CAM_LEIS[CAM_EDIT_IDX]=Object.assign(CAM_LEIS[CAM_EDIT_IDX],d); CAM_EDIT_IDX=null;} camRenderLeis(); CAM_UNSAVED=false; camToggleBtn(btn,false); camSetFeedback(status==='Publicado'?'Publicado com sucesso!':'Salvo com sucesso!','#1a6a1a');},900);}
+function camPreviewAdmin(){var d=camReadForm(); alert('PREVIEW\n'+d.tipo+' '+d.num+'\n'+d.ementa+'\n\n'+d.texto);}
+function camCancelEdit(){if(CAM_UNSAVED&&!confirm('Existem alterações não salvas. Deseja cancelar a edição?'))return; ['cam-form-num','cam-form-data','cam-form-tipo','cam-form-ementa','cam-form-artigos'].forEach(id=>document.getElementById(id).value=''); CAM_UNSAVED=false; CAM_EDIT_IDX=null; camSetFeedback('Edição cancelada.');}
+function camArchiveLei(){if(CAM_EDIT_IDX===null){camSetFeedback('Selecione uma lei para arquivar abrindo-a na listagem.','#a32d2d');return;} CAM_LEIS[CAM_EDIT_IDX].sit='Arquivado'; camRenderLeis(); camSetFeedback('Lei arquivada com sucesso.','#1a6a1a');}
+function camDeleteLei(){if(CAM_EDIT_IDX===null){camSetFeedback('Selecione uma lei para excluir abrindo-a na listagem.','#a32d2d');return;} if(!confirm('Confirma exclusão da lei selecionada?'))return; CAM_LEIS.splice(CAM_EDIT_IDX,1); CAM_EDIT_IDX=null; camRenderLeis(); camSetFeedback('Lei excluída com sucesso.','#1a6a1a');}
+
 function filtrarLeg(el,t){document.querySelectorAll('.leg-filtro').forEach(function(f){f.classList.remove('ativo');});el.classList.add('ativo');}
 function selecionarOuv(el){document.querySelectorAll('.ouv-tipo').forEach(function(t){t.classList.remove('sel');});el.classList.add('sel');}
 
