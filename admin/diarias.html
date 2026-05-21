@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Configurações — Painel Câmara VGRP</title>
+<title>Dashboard — Painel Câmara VGRP</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
@@ -554,7 +554,7 @@ select.fc{cursor:pointer}
 
     <nav class="sb-nav">
   <div class="grp-lbl">Visão Geral</div>
-  <div class="ni" onclick="go('dashboard',this)"><span class="ni-ico">📊</span><span class="ni-lbl">Dashboard</span></div>
+  <div class="ni act" onclick="go('dashboard',this)"><span class="ni-ico">📊</span><span class="ni-lbl">Dashboard</span></div>
   <div class="grp-lbl">Gestão do Site</div>
   <div class="ni" onclick="go('vereadores',this)"><span class="ni-ico">👥</span><span class="ni-lbl">Vereadores</span></div>
   <div class="ni" onclick="go('noticias',this)"><span class="ni-ico">📰</span><span class="ni-lbl">Notícias</span><span class="nbdg">6</span></div>
@@ -565,7 +565,7 @@ select.fc{cursor:pointer}
   <div class="ni" onclick="go('esic',this)"><span class="ni-ico">🔍</span><span class="ni-lbl">e-SIC — Pedidos</span><span class="nbdg" style="background:var(--verm)">2</span></div>
   <div class="ni" onclick="go('ouvidoria',this)"><span class="ni-ico">💬</span><span class="ni-lbl">Ouvidoria</span></div>
   <div class="grp-lbl">Sistema</div>
-  <div class="ni act" onclick="go('config',this)"><span class="ni-ico">⚙️</span><span class="ni-lbl">Configurações</span></div>
+  <div class="ni" onclick="go('config',this)"><span class="ni-ico">⚙️</span><span class="ni-lbl">Configurações</span></div>
   <div class="ni" onclick="go('usuarios',this)"><span class="ni-ico">👤</span><span class="ni-lbl">Usuários</span></div>
 </nav>
 
@@ -584,7 +584,7 @@ select.fc{cursor:pointer}
       <div class="tb-bc">
         <span style="color:var(--txt3)">Câmara</span>
         <span class="sep">/</span>
-        <span class="cur" id="bc">Configurações</span>
+        <span class="cur" id="bc">Dashboard</span>
       </div>
       <div class="tb-acts">
         <div class="tb-srch" onclick="showToast('🔍 Busca global em desenvolvimento','info')">
@@ -596,7 +596,7 @@ select.fc{cursor:pointer}
         <div class="tb-ico" title="Ver portal público" onclick="showToast('🌐 Abrindo portal público...','info')">🌐</div>
         <div class="tb-ico" title="Sair" onclick="showToast('👋 Saindo...','info')">🚪</div>
       </div>
-    </div><div style="padding:1.5rem 1.75rem"><div class="page" id="page-config"><div class="ph"><div><h1>Configurações <em>do Sistema</em></h1><div class="ph-sub">Dados da Câmara — publicados no site público</div></div><div class="ph-acts"><button class="btn btn-p" onclick="showToast('Configurações salvas!','ok')">💾 Salvar</button></div></div><div class="alert al-r" style="margin-bottom:1.5rem">⚠️ <div><strong>Ação obrigatória (10 dias — MP/MG):</strong> Preencha endereço, telefone, e-mail e horário reais abaixo.</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem"><div><div class="sec-t">Dados Institucionais</div><div class="form-g"><div class="form-row"><label>Nome da Câmara</label><input class="fi" type="text" value="Câmara Municipal de Vargem Grande do Rio Pardo"></div><div class="form-row"><label>Município / UF</label><input class="fi" type="text" value="Vargem Grande do Rio Pardo — MG"></div><div class="form-row"><label>CNPJ</label><input class="fi" type="text" placeholder="00.000.000/0001-00"></div><div class="form-row"><label>Endereço completo ⚠️ obrigatório MP</label><input class="fi" type="text" placeholder="Ex: Praça Presidente Getúlio Vargas, nº 01, Centro, CEP 39.480-000"></div><div class="form-row"><label>Telefone ⚠️ obrigatório MP</label><input class="fi" type="tel" placeholder="Ex: (38) 3735-1200"></div><div class="form-row"><label>E-mail institucional ⚠️ obrigatório MP</label><input class="fi" type="email" placeholder="Ex: contato@camaravgrp.mg.gov.br"></div><div class="form-row"><label>Horário de atendimento ⚠️ obrigatório MP</label><input class="fi" type="text" placeholder="Ex: Segunda a Sexta, 8h às 17h"></div><div class="form-row"><label>Sessões ordinárias</label><input class="fi" type="text" value="Terças-feiras às 19h — Plenário da Câmara"></div></div></div><div><div class="sec-t">Links Cidades MG — Transparência</div><div class="alert al-g" style="margin-bottom:1rem">✅ <div>Todos os 8 links validados (TCE-MG).</div></div><div class="form-g"><div class="form-row"><label>Receitas</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="execucaoOrcamentaria/receita/receita.xhtml" readonly></div><div class="form-row"><label>Despesas</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="execucaoOrcamentaria/despesa/despesa.xhtml" readonly></div><div class="form-row"><label>Licitações</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="licitacoesContratacoesECompras/licitacoes/licitacoes.xhtml" readonly></div><div class="form-row"><label>Contratos</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="licitacoesContratacoesECompras/contratosEAtas/contratosEAtas.xhtml" readonly></div><div class="form-row"><label>Servidores / RH</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="recursosHumanos/recursosHumanos.xhtml" readonly></div><div class="form-row"><label>Diárias</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="execucaoOrcamentaria/diarias/diarias.xhtml" readonly></div><div class="form-row"><label>Relatórios LRF</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="planejamentoEPrestacaoDeContas/lrf/lrf.xhtml" readonly></div><div class="form-row"><label>Convênios</label><input class="fi" style="font-size:11px;font-family:monospace" type="text" value="conveniosETransferencias/conveniosETransferencias.xhtml" readonly></div></div></div></div></div></div></div>
+    </div><div style="padding:1.5rem 1.75rem"><div class="page" id="page-dashboard"><div class="ph"><div><h1>Bem-vindo ao <em>Painel</em></h1><div class="ph-sub">Câmara Municipal de Vargem Grande do Rio Pardo — Minas Gerais</div></div><div class="ph-acts"><button class="btn btn-s" onclick="go('diario',null)">📜 Nova Edição DO</button><button class="btn btn-p" onclick="go('noticias',null)">✏️ Nova Notícia</button></div></div><div class="alert al-g">✅ <div><strong>Sistema operacional.</strong> TAC/MP em conformidade. Preencha os dados reais em Configurações antes de publicar.</div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem"><div class="card" style="cursor:pointer" onclick="go('vereadores',null)"><div class="card-ico">👥</div><div class="card-n">9</div><div class="card-l">Vereadores</div><div class="card-s">2025–2028</div></div><div class="card" style="cursor:pointer" onclick="go('noticias',null)"><div class="card-ico">📰</div><div class="card-n">6</div><div class="card-l">Notícias</div><div class="card-s">Publicadas</div></div><div class="card" style="cursor:pointer" onclick="go('diario',null)"><div class="card-ico">📜</div><div class="card-n">8</div><div class="card-l">Edições DO</div><div class="card-s">Diário Oficial</div></div><div class="card" style="cursor:pointer" onclick="go('legislacao',null)"><div class="card-ico">⚖️</div><div class="card-n">3</div><div class="card-l">Leis</div><div class="card-s">Cadastradas</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem"><div><div class="sec-t">Ações Rápidas</div><div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem"><button class="btn btn-s w100" onclick="go('vereadores',null)">👥 Gerenciar Vereadores</button><button class="btn btn-s w100" onclick="go('noticias',null)">📰 Publicar Notícia</button><button class="btn btn-s w100" onclick="go('diario',null)">📜 Nova Edição do Diário Oficial</button><button class="btn btn-s w100" onclick="go('legislacao',null)">⚖️ Cadastrar Lei / Decreto</button><button class="btn btn-s w100" onclick="go('esic',null)" style="color:var(--verm)">🔍 e-SIC — 2 pendentes</button><button class="btn btn-s w100" onclick="go('config',null)">⚙️ Configurações da Câmara</button></div></div><div><div class="sec-t">Checklist — Adequações TAC/MP</div><div class="chk-list"><div class="chk ok">✅ a.1/a.2 Acesso irrestrito + Transparência no menu</div><div class="chk ok">✅ b.1–b.4 LAI, links legais, Portal MG</div><div class="chk warn">⚠️ b.5/c.1.4 Preencher contato real em Configurações</div><div class="chk ok">✅ c.2 Receitas/Despesas → Cidades MG</div><div class="chk ok">✅ c.3.1/3.2 Licitações e Dispensas → Cidades MG</div><div class="chk ok">✅ c.3.7 Contratos → Cidades MG</div><div class="chk ok">✅ c.4 Convênios → Cidades MG</div><div class="chk warn">⚠️ c.5 Concursos — preencher quando houver</div><div class="chk ok">✅ c.6 Servidores + RH → Cidades MG</div><div class="chk ok">✅ c.7 Diárias → Cidades MG</div><div class="chk warn">⚠️ c.1.2 Legislação — cadastrar leis reais aqui</div><div class="chk ok">✅ c.8 FAQ → Cidades MG</div><div class="chk ok">✅ c.9.1–9.5 Busca, CSV, acessibilidade WCAG</div></div></div></div></div></div></div>
 </div>
 <div class="mo" id="mo-noticia">
   <div class="md wide">
@@ -967,7 +967,7 @@ function filtVer(val){
 
 // ── PAGE LABELS ──
 var labels = {
-  dashboard:"Dashboard", noticias:"Notícias e Eventos", licitacoes:"Licitações e Contratos",
+  dashboard:"Dashboard", diarias:"Diárias", noticias:"Notícias e Eventos", licitacoes:"Licitações e Contratos",
   diarias:"Diárias de Viagem", concursos:"Concursos Públicos", legislacao:"Legislação Municipal",
   organograma:"Estrutura Organizacional", docs:"Documentos e Upload", obras:"Obras Públicas",
   faq:"FAQ Cidadão", enquetes:"Enquetes", versoes:"Versionamento",
