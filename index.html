@@ -2928,16 +2928,26 @@ initRV();
 camRenderLeis();
 camSyncAdminVisibility();
 
-if((location.hash||'').replace('#','').trim()==='admin-leis'){ camAdminLogin(); }
-
 // HASH ROUTING
 function openFromHash(){
   var h=(window.location.hash||'').replace('#','').trim();
-  if(!h){ nav('home',{skipHash:true,instant:true}); return; }
-  nav(h,{skipHash:true,instant:true});
+  if(h==='admin-leis'){
+    nav('legislacao',{skipHash:true,instant:true});
+    if(window.location.hash!=='#legislacao') history.replaceState(null,'','#legislacao');
+    return;
+  }
+  if(!h){
+    nav('home',{skipHash:true,instant:true});
+    return;
+  }
+  if(document.getElementById('page-'+h)){
+    nav(h,{skipHash:true,instant:true});
+    return;
+  }
+  nav('home',{skipHash:true,instant:true});
 }
-window.addEventListener('hashchange',openFromHash);
 window.addEventListener('DOMContentLoaded',openFromHash);
+window.addEventListener('hashchange',openFromHash);
 
 // COUNTER
 var counted=false;
