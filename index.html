@@ -2924,10 +2924,6 @@ function initRV(){
   var ro2=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.4});
   document.querySelectorAll('.sec-divider').forEach(function(el){ro2.observe(el);});
 }
-initRV();
-camRenderLeis();
-camSyncAdminVisibility();
-
 // HASH ROUTING
 function openFromHash(){
   var h=(window.location.hash||'').replace('#','').trim();
@@ -2946,7 +2942,6 @@ function openFromHash(){
   }
   nav('home',{skipHash:true,instant:true});
 }
-window.addEventListener('DOMContentLoaded',openFromHash);
 window.addEventListener('hashchange',openFromHash);
 
 // COUNTER
@@ -3378,6 +3373,20 @@ function submitContato(){
 }
 
 
+
+
+function bootApp(){
+  try { camRenderLeis(); } catch(e) { console.error('Erro ao renderizar leis:', e); }
+  try { camSyncAdminVisibility(); } catch(e) { console.error('Erro ao sincronizar admin:', e); }
+  try { openFromHash(); } catch(e) { console.error('Erro ao abrir hash:', e); }
+  try { initRV(); } catch(e) { console.error('Erro ao iniciar reveals:', e); }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+  bootApp();
+}
 function camExportarDiarias(){
   var rows=['Benefici\u00E1rio,Cargo,Destino,Atividade,Per\u00EDodo,N\u00BA Di\u00E1rias,Valor Unit.,Total,Base Legal'];
   document.querySelectorAll('#tbl-diar tbody tr').forEach(function(r){
