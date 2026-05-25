@@ -1,19 +1,66 @@
 const API_BASE = '../api/';
 
-function loadNoticias() {}
-function saveNoticia() {}
-function deleteNoticia() {}
-function loadVereadores() {}
-function saveVereador() {}
-function deleteVereador() {}
-function loadDiario() {}
-function saveDiario() {}
-function deleteDiario() {}
-function loadLegislacao() {}
-function saveLegislacao() {}
-function deleteLegislacao() {}
+var PAGE_MAP = {
+  dashboard:'index.html', vereadores:'vereadores.html', noticias:'noticias.html', diario:'diario.html',
+  legislacao:'legislacao.html', concursos:'concursos.html', esic:'esic.html', ouvidoria:'ouvidoria.html',
+  config:'config.html', usuarios:'usuarios.html'
+};
 
-var PAGE_MAP={'dashboard':'index.html','vereadores':'vereadores.html','noticias':'noticias.html','diario':'diario.html','legislacao':'legislacao.html','concursos':'concursos.html','esic':'esic.html','ouvidoria':'ouvidoria.html','config':'config.html','usuarios':'usuarios.html'};
+var STORE_PREFIX = 'adm-painel:';
+
+function memoryGet(resource){
+  try { return JSON.parse(localStorage.getItem(STORE_PREFIX + resource) || '[]'); }
+  catch(_) { return []; }
+}
+function memorySet(resource, value){
+  localStorage.setItem(STORE_PREFIX + resource, JSON.stringify(value || []));
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+async function apiRequest(resource, method, payload){
+  var url = API_BASE + resource;
+  try {
+    var res = await fetch(url, {
+      method: method || 'GET',
+      headers: {'Content-Type':'application/json'},
+      body: payload ? JSON.stringify(payload) : undefined
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    if(res.status === 204) return null;
+    return await res.json();
+  } catch(_) {
+    var db = memoryGet(resource);
+    if((method || 'GET') === 'GET') return db;
+    if(method === 'POST'){
+      var row = Object.assign({id:uid(), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()}, payload || {});
+      db.unshift(row); memorySet(resource, db); return row;
+    }
+    if(method === 'PUT'){
+      var i = db.findIndex(function(x){ return String(x.id) === String((payload||{}).id); });
+      if(i < 0) throw new Error('Registro não encontrado');
+      db[i] = Object.assign({}, db[i], payload || {}, {updatedAt:new Date().toISOString()});
+      memorySet(resource, db); return db[i];
+    }
+    if(method === 'DELETE'){
+      memorySet(resource, db.filter(function(x){ return String(x.id) !== String((payload||{}).id); }));
+      return {ok:true};
+    }
+    return db;
+  }
+}
+
+async function loadNoticias(){ return apiRequest('noticias','GET'); }
+async function saveNoticia(data){ return data && data.id ? apiRequest('noticias','PUT',data) : apiRequest('noticias','POST',data); }
+async function deleteNoticia(id){ return apiRequest('noticias','DELETE',{id:id}); }
+async function loadVereadores(){ return apiRequest('vereadores','GET'); }
+async function saveVereador(data){ return data && data.id ? apiRequest('vereadores','PUT',data) : apiRequest('vereadores','POST',data); }
+async function deleteVereador(id){ return apiRequest('vereadores','DELETE',{id:id}); }
+async function loadDiario(){ return apiRequest('diario','GET'); }
+async function saveDiario(data){ return data && data.id ? apiRequest('diario','PUT',data) : apiRequest('diario','POST',data); }
+async function deleteDiario(id){ return apiRequest('diario','DELETE',{id:id}); }
+async function loadLegislacao(){ return apiRequest('legislacao','GET'); }
+async function saveLegislacao(data){ return data && data.id ? apiRequest('legislacao','PUT',data) : apiRequest('legislacao','POST',data); }
+async function deleteLegislacao(id){ return apiRequest('legislacao','DELETE',{id:id}); }
 
 async function go(id,el,pushState){
   var page = PAGE_MAP[id];
@@ -31,38 +78,29 @@ async function go(id,el,pushState){
     curMain.innerHTML = nextMain.innerHTML;
 
     document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('act'); });
-    var active = document.querySelector('.ni[onclick*="go(\\\'' + id + '\\\'"]');
+    var active = document.querySelector('.ni[onclick*="go(\'" + id + "\'"]');
     if(active) active.classList.add('act');
 
-    if(pushState !== false){
-      history.pushState({page:id}, '', page);
-    }
-
+    if(pushState !== false){ history.pushState({page:id}, '', page); }
     window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
-
     if(typeof animBars === 'function') setTimeout(animBars, 120);
   } catch(err){
     console.error(err);
-    window.location.href = page;
+    showToast('Erro ao carregar seção. Recarregando...', 'w');
+    setTimeout(function(){ window.location.href = page; }, 700);
   }
 }
-function filtVer(val){val=val.toLowerCase();document.querySelectorAll("#tbl-ver tbody tr").forEach(function(r){r.style.display=r.textContent.toLowerCase().includes(val)?"":"none";});}
-
-// ── MULTI-PAGE NAVIGATION ──
-var PAGE_MAP = {
-  'dashboard':'index.html','vereadores':'vereadores.html',
-  'noticias':'noticias.html','diario':'diario.html',
-  'legislacao':'legislacao.html','concursos':'concursos.html',
-  'esic':'esic.html','ouvidoria':'ouvidoria.html',
-  'config':'config.html','usuarios':'usuarios.html'
-};
 
 function filtVer(val){
-  val = val.toLowerCase();
+  val = (val || '').toLowerCase();
   document.querySelectorAll('#tbl-ver tbody tr').forEach(function(r){
     r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
   });
 }
+
+window.addEventListener('popstate', function(e){
+  if(e.state && e.state.page){ go(e.state.page, null, false); }
+});
 
 (function(){
   // ── INTRO DISMISS ──
@@ -1472,25 +1510,4 @@ menu.addEventListener('click', (event) => {
   renderView(button.dataset.view);
 });
 
-// Funções vazias para integração futura
-function loadNoticias() {}
-function saveNoticia() {}
-function deleteNoticia() {}
-function loadVereadores() {}
-function saveVereador() {}
-function deleteVereador() {}
-function loadDiario() {}
-function saveDiario() {}
-function deleteDiario() {}
-function loadLegislacao() {}
-function saveLegislacao() {}
-function deleteLegislacao() {}
-
 renderView('dashboard');
-
-
-window.addEventListener("popstate", function(){
-  var file = location.pathname.split("/").pop() || "index.html";
-  var id = Object.keys(PAGE_MAP).find(function(k){ return PAGE_MAP[k] === file; }) || "dashboard";
-  go(id, null, true);
-});
