@@ -1,16 +1,1 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel Admin</title><style>body{margin:0;font-family:Arial;background:#0d120d;color:#d8ead8;display:flex;height:100vh}.sb{width:260px;background:#101710;padding:12px;border-right:1px solid #263326}.sb a{display:block;color:#9ad49a;text-decoration:none;padding:10px;border-radius:6px}.sb a.active,.sb a:hover{background:#173117;color:#fff}.main{flex:1;display:flex;flex-direction:column}.top{height:56px;background:#101710;border-bottom:1px solid #263326;display:flex;align-items:center;justify-content:space-between;padding:0 16px}#content{padding:16px;overflow:auto}.card{background:#131d13;border:1px solid #2f4d2f;padding:12px;border-radius:8px}button{background:#1f7a2f;color:#fff;border:0;padding:8px 10px;border-radius:6px;cursor:pointer}</style></head><body>
-<aside class="sb" id="menu"></aside><section class="main"><div class="top"><strong id="ttl">Dashboard</strong><button onclick="logout()">Sair</button></div><main id="content"></main></section>
-<script>
-const routes=['dashboard','vereadores','noticias','diario','legislacao','concursos','esic','ouvidoria','transparencia','diarias','folha','usuarios','config'];
-const menu=document.getElementById('menu');
-menu.innerHTML=routes.map(r=>`<a href="#/${r}" data-r="${r}">${r}</a>`).join('');
-async function ensureAuth(){const r=await fetch('api/auth.php');const j=await r.json();if(!j.authenticated)location.href='login.html';}
-function active(r){document.querySelectorAll('#menu a').forEach(a=>a.classList.toggle('active',a.dataset.r===r));document.getElementById('ttl').textContent=r;}
-async function render(){let r=(location.hash.replace('#/','')||'dashboard');if(!routes.includes(r))r='dashboard';active(r);const el=document.getElementById('content');
-if(r==='dashboard'){el.innerHTML='<div class="card"><h2>Dashboard</h2><p>Painel SPA ativo sem recarregar página.</p></div>';return;}
-el.innerHTML=`<div class="card"><h2>${r}</h2><div id="list"></div><button onclick="loadList('${r}')">Atualizar</button></div>`;loadList(r);
-}
-async function loadList(r){const map={noticias:'news',vereadores:'councilors',legislacao:'laws',diario:'official_diary',concursos:'concursos',esic:'esic',ouvidoria:'ouvidoria',config:'settings',transparencia:'transparency',usuarios:'users'};if(!map[r])return;const x=await fetch(`api/${map[r]}.php`);const j=await x.json();document.getElementById('list').innerHTML='<pre>'+JSON.stringify(j.data||[],null,2)+'</pre>';}
-async function logout(){await fetch('api/auth.php',{method:'DELETE'});location.href='login.html';}
-window.addEventListener('hashchange',render);ensureAuth().then(render);
-</script></body></html>
+PLACEHOLDER_TOO_LARGE
