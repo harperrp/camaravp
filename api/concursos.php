@@ -7,16 +7,16 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 if ($method === 'GET') {
     if ($id) {
-        $stmt = $pdo->prepare('SELECT * FROM official_diary WHERE id=? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT * FROM public_tenders WHERE id = ? LIMIT 1');
         $stmt->execute([$id]);
         json_response(['ok' => true, 'data' => $stmt->fetch()]);
     }
 
     $admin = isset($_GET['admin']) && $_GET['admin'] == '1';
     if ($admin) {
-        $stmt = $pdo->query('SELECT * FROM official_diary ORDER BY publication_date DESC, id DESC');
+        $stmt = $pdo->query('SELECT * FROM public_tenders ORDER BY opening_date DESC, id DESC');
     } else {
-        $stmt = $pdo->query("SELECT * FROM official_diary WHERE status='published' ORDER BY publication_date DESC, id DESC");
+        $stmt = $pdo->query("SELECT * FROM public_tenders WHERE status <> 'archived' ORDER BY opening_date DESC, id DESC");
     }
     json_response(['ok' => true, 'data' => $stmt->fetchAll()]);
 }
@@ -24,14 +24,15 @@ if ($method === 'GET') {
 if ($method === 'POST') {
     require_login();
     $d = get_json_input();
-    $stmt = $pdo->prepare('INSERT INTO official_diary (title, edition_number, description, file_url, publication_date, status) VALUES (?, ?, ?, ?, ?, ?)');
+    $stmt = $pdo->prepare('INSERT INTO public_tenders (title, tender_number, modality, description, file_url, opening_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $d['title'] ?? '',
-        $d['edition_number'] ?? null,
+        $d['tender_number'] ?? null,
+        $d['modality'] ?? null,
         $d['description'] ?? null,
         $d['file_url'] ?? null,
-        $d['publication_date'] ?? date('Y-m-d'),
-        $d['status'] ?? 'published'
+        $d['opening_date'] ?? null,
+        $d['status'] ?? 'publicado'
     ]);
     json_response(['ok' => true, 'id' => (int)$pdo->lastInsertId()], 201);
 }
@@ -40,14 +41,15 @@ if ($method === 'PUT') {
     require_login();
     if (!$id) json_response(['ok' => false, 'error' => 'ID obrigatorio'], 400);
     $d = get_json_input();
-    $stmt = $pdo->prepare('UPDATE official_diary SET title=?, edition_number=?, description=?, file_url=?, publication_date=?, status=? WHERE id=?');
+    $stmt = $pdo->prepare('UPDATE public_tenders SET title=?, tender_number=?, modality=?, description=?, file_url=?, opening_date=?, status=? WHERE id=?');
     $stmt->execute([
         $d['title'] ?? '',
-        $d['edition_number'] ?? null,
+        $d['tender_number'] ?? null,
+        $d['modality'] ?? null,
         $d['description'] ?? null,
         $d['file_url'] ?? null,
-        $d['publication_date'] ?? date('Y-m-d'),
-        $d['status'] ?? 'published',
+        $d['opening_date'] ?? null,
+        $d['status'] ?? 'publicado',
         $id
     ]);
     json_response(['ok' => true]);
@@ -56,7 +58,7 @@ if ($method === 'PUT') {
 if ($method === 'DELETE') {
     require_login();
     if (!$id) json_response(['ok' => false, 'error' => 'ID obrigatorio'], 400);
-    $stmt = $pdo->prepare('DELETE FROM official_diary WHERE id=?');
+    $stmt = $pdo->prepare('DELETE FROM public_tenders WHERE id=?');
     $stmt->execute([$id]);
     json_response(['ok' => true]);
 }
