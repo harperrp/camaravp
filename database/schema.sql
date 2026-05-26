@@ -167,7 +167,7 @@ ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
 -- Senha inicial: Admin@123456
 -- Trocar imediatamente após o primeiro acesso.
 INSERT INTO users (name, email, password_hash, role, active) VALUES
-('Administrador', 'admin@camaravp.mg.gov.br', '$2y$10$PqSg5AEu93AdIhHdjd9HGOXiP7Ra9Lk4zMWhOY.8S.yxQ9NyzYG3e', 'admin', 1)
-ON DUPLICATE KEY UPDATE role='admin', active=1;
+('Administrador', 'admin@camaravp.mg.gov.br', '$2y$10$Lx8nOKlg/D.BKXeu8lS3d.VyZl.RvG429TDXov/Mu33Mh8aWxFjjG', 'admin', 1)
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), role='admin', active=1;
 
 SET FOREIGN_KEY_CHECKS = 1;
