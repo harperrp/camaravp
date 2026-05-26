@@ -106,6 +106,7 @@ const crud = {
     endpoint: "legislacao.php?admin=1",
     saveEndpoint: "legislacao.php",
     title: "Legislacao Municipal",
+    modalTitle: "Cadastrar Instrumento Normativo",
     subtitle: "Leis, decretos, resolucoes e atos normativos.",
     empty: "Nenhum ato cadastrado.",
     primary: "title",
@@ -116,14 +117,14 @@ const crud = {
       ["status", "Status", "status"],
     ],
     fields: [
-      ["title", "Titulo", "text", "span2", "", true],
-      ["law_number", "Numero", "text"],
-      ["law_type", "Tipo", "select", "", [["Lei Ordinaria", "Lei Ordinaria"], ["Lei Complementar", "Lei Complementar"], ["Decreto Legislativo", "Decreto Legislativo"], ["Resolucao", "Resolucao"], ["Portaria", "Portaria"]]],
-      ["publication_date", "Data", "date"],
-      ["status", "Status", "select", "", [["published", "Publicado"], ["draft", "Rascunho"], ["archived", "Arquivado"]]],
-      ["file_url", "Arquivo PDF", "upload-doc", "span2"],
-      ["summary", "Ementa", "textarea", "span2"],
-      ["content", "Texto completo", "textarea", "span2 tall"],
+      ["file_url", "Anexar PDF da Lei", "law-pdf", "span2"],
+      ["law_type", "Tipo", "select", "", [["Lei Ordinaria", "Lei Ordinaria"], ["Lei Complementar", "Lei Complementar"], ["Decreto Legislativo", "Decreto Legislativo"], ["Resolucao", "Resolucao"], ["Portaria", "Portaria"], ["Emenda a Lei Organica", "Emenda a Lei Organica"]]],
+      ["law_number", "Numero / Ano", "text", "", "", true],
+      ["publication_date", "Data de publicacao", "date"],
+      ["status", "Situacao", "select", "", [["published", "Vigente"], ["draft", "Rascunho"], ["archived", "Revogada / Arquivada"]]],
+      ["summary", "Ementa", "text", "span2", "", true],
+      ["related_laws", "Vinculacoes", "text", "span2"],
+      ["content", "Artigos da Lei", "textarea", "span2 tall"],
     ],
   },
   concursos: {
@@ -603,7 +604,7 @@ function modalCrud(key) {
   return `
     <div class="mo" id="mo-${key}">
       <div class="md md-wide">
-        <div class="md-h"><h3>${esc(cfg.title)}</h3><button class="md-x" onclick="closeMo('mo-${key}')">×</button></div>
+        <div class="md-h"><h3>${esc(cfg.modalTitle || cfg.title)}</h3><button class="md-x" onclick="closeMo('mo-${key}')">×</button></div>
         <div class="md-b">
           <input type="hidden" id="${key}-id">
           <div class="fg">
@@ -623,6 +624,24 @@ function modalCrud(key) {
 function fieldHtml(key, name, label, type, span, options, required) {
   const id = `${key}-${name}`;
   const req = required ? " required" : "";
+  if (type === "law-pdf") {
+    return `
+      <div class="fgrp ${span || ""}">
+        <label>${esc(label)}</label>
+        <div class="law-upload" onclick="document.getElementById('${id}-file').click()" style="border:2px dashed var(--border2);border-radius:14px;padding:28px 18px;text-align:center;cursor:pointer;background:rgba(46,204,64,.035);display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div class="law-upload-ico" style="width:42px;height:42px;border-radius:12px;background:rgba(46,204,64,.12);display:flex;align-items:center;justify-content:center;color:var(--g5);font-weight:900">PDF</div>
+          <strong style="text-transform:uppercase">Anexar PDF da Lei</strong>
+          <span style="max-width:460px;color:var(--txt3);font-size:13px;line-height:1.4">Arraste o PDF aqui ou clique para selecionar. O arquivo fica disponivel para baixar no site.</span>
+        </div>
+        <div class="upload-row">
+          <input class="fc" id="${id}" type="text" placeholder="URL do PDF ou arquivo enviado" oninput="updateUploadPreview('${key}', '${name}')">
+          <input id="${id}-file" type="file" accept="application/pdf,.pdf" hidden onchange="handleUpload('${key}', '${name}', this.files[0])">
+          <button class="btn btn-s" type="button" onclick="document.getElementById('${id}-file').click()">Upload</button>
+        </div>
+        <div class="upload-preview" id="${id}-preview"></div>
+      </div>
+    `;
+  }
   if (type === "textarea") {
     return `<div class="fgrp ${span || ""}"><label>${esc(label)}${required ? " *" : ""}</label><textarea class="fc" id="${id}"${req}></textarea></div>`;
   }
@@ -649,6 +668,7 @@ function fieldHtml(key, name, label, type, span, options, required) {
 
 function defaultFor(name) {
   if (name === "status") return "published";
+  if (name === "law_type") return "Lei Ordinaria";
   if (name === "active") return "1";
   if (name === "legislature") return "2025-2028";
   if (name === "display_order") return "0";
@@ -664,7 +684,7 @@ function openCrudModal(key, id) {
     if (type === "date") input.value = inputDate(row[name]);
     else if (name === "password") input.value = "";
     else input.value = row[name] ?? defaultFor(name);
-    if (type === "upload-image" || type === "upload-doc") updateUploadPreview(key, name);
+    if (type === "upload-image" || type === "upload-doc" || type === "law-pdf") updateUploadPreview(key, name);
   });
   openMo(`mo-${key}`);
 }
@@ -721,6 +741,9 @@ async function submitCrud(key) {
     return;
   }
   if (id && key === "usuarios" && !payload.password) delete payload.password;
+  if (key === "legislacao") {
+    payload.title = `${payload.law_type || "Ato Normativo"} Nº ${payload.law_number || ""}`.trim();
+  }
   await api(endpointFor(key) + (id ? "?id=" + encodeURIComponent(id) : ""), {
     method: id ? "PUT" : "POST",
     body: JSON.stringify(payload),
@@ -870,12 +893,12 @@ async function saveSettings() {
 }
 
 function previewLaw() {
-  const title = $("#legislacao-title")?.value || "";
   const number = $("#legislacao-law_number")?.value || "";
   const type = $("#legislacao-law_type")?.value || "";
   const summary = $("#legislacao-summary")?.value || "";
+  const related = $("#legislacao-related_laws")?.value || "";
   const content = $("#legislacao-content")?.value || "";
-  const text = `${type} ${number}\n\n${title}\n\nEMENTA: ${summary}\n\n${content}`.trim();
+  const text = `${type} Nº ${number}\n\nEMENTA: ${summary}\n\nVINCULACOES: ${related || "-"}\n\n${content}`.trim();
   const win = window.open("", "_blank");
   if (!win) return toast("Permita pop-ups para abrir o preview.", "warning");
   win.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.6;padding:28px">${esc(text)}</pre>`);

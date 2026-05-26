@@ -2807,6 +2807,7 @@ table.dt thead tr:nth-child(2) th{background:var(--g700);padding:6px 12px;font-s
       <button onclick="camPrintLei()" style="display:flex;align-items:center;gap:6px;background:var(--verde);color:#fff;border:none;padding:8px 16px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s">&#x1F5A8;&#xFE0F; Imprimir</button>
       <button onclick="camCopyLei()" style="display:flex;align-items:center;gap:6px;background:var(--branco);color:var(--cinza);border:1px solid rgba(26,71,49,.2);padding:8px 16px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">&#x1F4CB; Copiar texto</button>
       <button onclick="camDownloadLei()" style="display:flex;align-items:center;gap:6px;background:var(--branco);color:var(--cinza);border:1px solid rgba(26,71,49,.2);padding:8px 16px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">&#x2B07;&#xFE0F; Baixar .txt</button>
+      <button id="cml-pdf-btn" onclick="camDownloadLeiPdf()" style="display:none;align-items:center;gap:6px;background:var(--verde);color:#fff;border:1px solid rgba(26,71,49,.2);padding:8px 16px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">&#x1F4C4; Baixar PDF</button>
       <div style="margin-left:auto;font-size:10px;color:var(--cinza-m);font-style:italic">Dados oficiais</div>
     </div>
     <div style="padding:28px 32px;background:#fff">
@@ -3034,6 +3035,8 @@ function camOpenLei(idx){
   mo.querySelector("#cml-data").textContent=lei.data;
   mo.querySelector("#cml-pub").textContent=lei.data;
   mo.querySelector("#cml-sit").innerHTML='<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px"><span style="width:6px;height:6px;border-radius:50%;background:'+sitC[lei.sit]+';display:inline-block"></span>'+lei.sit+extra+'</span>';
+  var pdfBtn=mo.querySelector("#cml-pdf-btn");
+  if(pdfBtn) pdfBtn.style.display=lei.file_url?"flex":"none";
 
   var tx=mo.querySelector("#cml-texto");
   var cp=mo.querySelector("#cml-comp");
@@ -3124,6 +3127,17 @@ function camDownloadLei(){
   var a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download=l.tipo.replace(/ /g,"-")+"-"+l.num.replace("/","_")+".txt";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function camDownloadLeiPdf(idx){
+  var l=typeof idx==="number" ? camGetVisibleLeis()[idx] : window._camLeiAtual;
+  if(!l||!l.file_url){ alert("PDF nao disponivel para este ato."); return; }
+  var a=document.createElement("a");
+  a.href=l.file_url;
+  a.target="_blank";
+  a.rel="noopener noreferrer";
+  a.download=(l.tipo||"lei").replace(/ /g,"-")+"-"+String(l.num||"arquivo").replace("/","_")+".pdf";
   document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 
@@ -3402,6 +3416,6 @@ function camExportarDiarias(){
 
 </script>
 
-<script src="assets/site-backend.js"></script>
+<script src="assets/site-backend.js?v=20260526-legislacao-pdf"></script>
 </body>
 </html>

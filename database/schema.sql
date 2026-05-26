@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS laws (
   law_type VARCHAR(80) NULL,
   summary TEXT NULL,
   content LONGTEXT NULL,
+  related_laws TEXT NULL,
   file_url VARCHAR(500) NULL,
   publication_date DATE NULL,
   status ENUM('draft','published','archived') NOT NULL DEFAULT 'published',

@@ -84,7 +84,15 @@
 
   function imageStyle(url, fallback) {
     if (!url) return fallback || "background:linear-gradient(135deg,var(--g700),var(--g900))";
-    return `background:linear-gradient(135deg,rgba(26,71,49,.5),rgba(26,71,49,.85)),url('${esc(url)}') center/cover`;
+    return `background:linear-gradient(135deg,rgba(26,71,49,.5),rgba(26,71,49,.85)),url('${esc(assetUrl(url))}') center/cover`;
+  }
+
+  function assetUrl(value) {
+    const path = String(value || "").trim();
+    if (!path) return "";
+    if (/^(https?:|data:|blob:|mailto:|tel:|#)/i.test(path)) return path;
+    if (path.startsWith("/")) return path;
+    return path.replace(/^\.\.\//, "").replace(/^\.\//, "");
   }
 
   function renderCouncilors(rows) {
@@ -170,7 +178,7 @@
           <div class="diario-data">${dateBR(item.publication_date)}</div>
           <span class="diario-tag-pill">PDF disponivel</span>
           <div style="font-size:12.5px;color:var(--ink-l);line-height:1.6">${esc(item.description || item.title || "Publicacao oficial da Camara Municipal.")}</div>
-          ${item.file_url ? `<a href="${esc(item.file_url)}" target="_blank" rel="noopener noreferrer" class="diario-btn">&#128196; Baixar PDF</a>` : `<a href="#" class="diario-btn" onclick="alertPDF();return false">&#128196; Solicitar PDF</a>`}
+          ${item.file_url ? `<a href="${esc(assetUrl(item.file_url))}" target="_blank" rel="noopener noreferrer" class="diario-btn">&#128196; Baixar PDF</a>` : `<a href="#" class="diario-btn" onclick="alertPDF();return false">&#128196; Solicitar PDF</a>`}
         </div>
       `).join("");
       const more = document.getElementById("diario-ver-mais");
@@ -202,7 +210,8 @@
       sit: item.status === "published" ? "Publicado" : item.status === "archived" ? "Arquivado" : "Rascunho",
       ementa: item.summary || item.title || "",
       texto: item.content || "",
-      file_url: item.file_url || "",
+      vinculacoes: item.related_laws || "",
+      file_url: assetUrl(item.file_url || ""),
     };
   }
 
@@ -212,7 +221,10 @@
     if (Array.isArray(window.CAM_LEIS)) {
       window.CAM_LEIS.length = 0;
       mapped.forEach((item) => window.CAM_LEIS.push(item));
-      if (typeof window.camRenderLeis === "function") window.camRenderLeis();
+      if (typeof window.camRenderLeis === "function") {
+        window.camRenderLeis();
+        enhanceLawPdfButtons(mapped);
+      }
     }
 
     const lawBox = Array.from(document.querySelectorAll(".lbox")).find((box) => {
@@ -229,6 +241,25 @@
           </div>
         `).join("") + footer;
     }
+  }
+
+  function enhanceLawPdfButtons(rows) {
+    const tableRows = Array.from(document.querySelectorAll("#cam-lei-tbody tr"));
+    tableRows.forEach((tr) => {
+      const index = Number(tr.getAttribute("data-idx"));
+      const item = rows[index];
+      const file = item && item.file_url;
+      const cell = tr.lastElementChild;
+      if (!file || !cell || cell.querySelector(".cam-pdf-added")) return;
+      const link = document.createElement("a");
+      link.className = "cam-pdf-added";
+      link.href = file;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Baixar PDF";
+      link.style.cssText = "display:inline-flex;align-items:center;gap:5px;margin-left:6px;background:#fff;color:var(--verde);border:1px solid rgba(26,71,49,.2);padding:7px 12px;border-radius:4px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap";
+      cell.appendChild(link);
+    });
   }
 
   function openNews(id) {
