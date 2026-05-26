@@ -23,7 +23,19 @@
 
   function parseDate(value) {
     if (!value) return null;
-    const date = new Date(String(value).replace(" ", "T"));
+    const raw = String(value).trim();
+    const parts = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+    if (parts) {
+      return new Date(
+        Number(parts[1]),
+        Number(parts[2]) - 1,
+        Number(parts[3]),
+        Number(parts[4] || 0),
+        Number(parts[5] || 0),
+        Number(parts[6] || 0)
+      );
+    }
+    const date = new Date(raw.replace(" ", "T"));
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
@@ -357,4 +369,3 @@
     bootBackendContent();
   }
 })();
-

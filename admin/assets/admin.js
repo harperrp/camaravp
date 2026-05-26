@@ -3,6 +3,7 @@ const API_BASE = "../api/";
 const state = {
   current: "dashboard",
   user: null,
+  filters: {},
   data: {
     noticias: [],
     vereadores: [],
@@ -18,11 +19,11 @@ const state = {
 
 const sections = {
   dashboard: "Dashboard",
-  noticias: "Noticias",
+  noticias: "Noticias e Eventos",
   vereadores: "Vereadores",
   diario: "Diario Oficial",
-  legislacao: "Legislacao",
-  concursos: "Concursos",
+  legislacao: "Legislacao Municipal",
+  concursos: "Concursos Publicos",
   esic: "e-SIC",
   ouvidoria: "Ouvidoria",
   config: "Configuracoes",
@@ -33,7 +34,9 @@ const crud = {
   noticias: {
     endpoint: "noticias.php",
     title: "Noticias e Eventos",
+    subtitle: "Publicacoes do site, comunicados e eventos oficiais.",
     empty: "Nenhuma noticia cadastrada.",
+    primary: "title",
     columns: [
       ["title", "Titulo"],
       ["category", "Categoria"],
@@ -41,35 +44,38 @@ const crud = {
       ["status", "Status", "status"],
     ],
     fields: [
-      ["title", "Titulo", "text", "span2"],
+      ["title", "Titulo da noticia", "text", "span2", "", true],
       ["category", "Categoria", "text"],
-      ["published_at", "Data", "date"],
+      ["published_at", "Data de publicacao", "date"],
       ["status", "Status", "select", "", [["published", "Publicada"], ["draft", "Rascunho"], ["archived", "Arquivada"]]],
       ["summary", "Resumo", "textarea", "span2"],
-      ["content", "Conteudo", "textarea", "span2"],
-      ["image_url", "Imagem URL", "text", "span2"],
+      ["content", "Conteudo completo", "textarea", "span2 tall"],
+      ["image_url", "Imagem da noticia", "upload-image", "span2"],
     ],
   },
   vereadores: {
     endpoint: "vereadores.php?admin=1",
     saveEndpoint: "vereadores.php",
-    title: "Vereadores",
+    title: "Gestao de Vereadores",
+    subtitle: "Legislatura 2025-2028 e dados exibidos no site publico.",
     empty: "Nenhum vereador cadastrado.",
+    primary: "name",
     columns: [
       ["name", "Nome"],
       ["role", "Cargo"],
-      ["party", "Partido"],
+      ["party", "Partido", "party"],
+      ["legislature", "Mandato"],
       ["active", "Status", "active"],
     ],
     fields: [
-      ["name", "Nome", "text", "span2"],
-      ["role", "Cargo", "text"],
-      ["party", "Partido", "text"],
-      ["legislature", "Legislatura", "text"],
+      ["name", "Nome completo", "text", "span2", "", true],
+      ["role", "Cargo", "select", "", [["Presidente", "Presidente"], ["Vice-Presidente", "Vice-Presidente"], ["1o Secretario", "1o Secretario"], ["2o Secretario", "2o Secretario"], ["Tesoureiro", "Tesoureiro"], ["Vereador", "Vereador"]]],
+      ["party", "Partido", "select", "", [["AVANTE", "AVANTE"], ["MDB", "MDB"], ["PL", "PL"], ["PSD", "PSD"], ["REPUBLICANOS", "REPUBLICANOS"], ["UNIAO", "UNIAO"], ["OUTRO", "OUTRO"]]],
+      ["legislature", "Mandato", "text"],
       ["display_order", "Ordem", "number"],
       ["phone", "Telefone", "text"],
       ["email", "E-mail", "text"],
-      ["photo_url", "Foto URL", "text", "span2"],
+      ["photo_url", "Foto", "upload-image", "span2"],
       ["biography", "Biografia", "textarea", "span2"],
       ["active", "Status", "select", "", [["1", "Ativo"], ["0", "Inativo"]]],
     ],
@@ -78,19 +84,21 @@ const crud = {
     endpoint: "diario.php?admin=1",
     saveEndpoint: "diario.php",
     title: "Diario Oficial",
+    subtitle: "Edicoes oficiais publicadas no portal.",
     empty: "Nenhuma edicao cadastrada.",
+    primary: "title",
     columns: [
-      ["title", "Titulo"],
       ["edition_number", "Edicao"],
+      ["title", "Titulo"],
       ["publication_date", "Data", "date"],
       ["status", "Status", "status"],
     ],
     fields: [
-      ["title", "Titulo", "text", "span2"],
-      ["edition_number", "Edicao", "text"],
-      ["publication_date", "Data", "date"],
+      ["title", "Titulo da edicao", "text", "span2", "", true],
+      ["edition_number", "Numero da edicao", "text"],
+      ["publication_date", "Data de publicacao", "date"],
       ["status", "Status", "select", "", [["published", "Publicado"], ["draft", "Rascunho"], ["archived", "Arquivado"]]],
-      ["file_url", "PDF URL", "text", "span2"],
+      ["file_url", "Arquivo PDF", "upload-doc", "span2"],
       ["description", "Descricao", "textarea", "span2"],
     ],
   },
@@ -98,7 +106,9 @@ const crud = {
     endpoint: "legislacao.php?admin=1",
     saveEndpoint: "legislacao.php",
     title: "Legislacao Municipal",
+    subtitle: "Leis, decretos, resolucoes e atos normativos.",
     empty: "Nenhum ato cadastrado.",
+    primary: "title",
     columns: [
       ["law_number", "Numero"],
       ["law_type", "Tipo"],
@@ -106,21 +116,23 @@ const crud = {
       ["status", "Status", "status"],
     ],
     fields: [
-      ["title", "Titulo", "text", "span2"],
+      ["title", "Titulo", "text", "span2", "", true],
       ["law_number", "Numero", "text"],
-      ["law_type", "Tipo", "text"],
+      ["law_type", "Tipo", "select", "", [["Lei Ordinaria", "Lei Ordinaria"], ["Lei Complementar", "Lei Complementar"], ["Decreto Legislativo", "Decreto Legislativo"], ["Resolucao", "Resolucao"], ["Portaria", "Portaria"]]],
       ["publication_date", "Data", "date"],
       ["status", "Status", "select", "", [["published", "Publicado"], ["draft", "Rascunho"], ["archived", "Arquivado"]]],
-      ["file_url", "Arquivo URL", "text", "span2"],
+      ["file_url", "Arquivo PDF", "upload-doc", "span2"],
       ["summary", "Ementa", "textarea", "span2"],
-      ["content", "Texto", "textarea", "span2"],
+      ["content", "Texto completo", "textarea", "span2 tall"],
     ],
   },
   concursos: {
     endpoint: "concursos.php?admin=1",
     saveEndpoint: "concursos.php",
     title: "Concursos Publicos",
+    subtitle: "Processos seletivos, concursos e editais.",
     empty: "Nenhum concurso cadastrado.",
+    primary: "title",
     columns: [
       ["title", "Titulo"],
       ["tender_number", "Numero"],
@@ -128,20 +140,22 @@ const crud = {
       ["status", "Status", "plain"],
     ],
     fields: [
-      ["title", "Titulo", "text", "span2"],
+      ["title", "Titulo", "text", "span2", "", true],
       ["tender_number", "Numero", "text"],
-      ["modality", "Modalidade", "text"],
-      ["opening_date", "Data", "date"],
-      ["status", "Status", "text"],
-      ["file_url", "Arquivo URL", "text", "span2"],
+      ["modality", "Modalidade", "select", "", [["Concurso Publico", "Concurso Publico"], ["Processo Seletivo", "Processo Seletivo"], ["Edital", "Edital"], ["Chamamento", "Chamamento"]]],
+      ["opening_date", "Data de abertura", "date"],
+      ["status", "Status", "select", "", [["publicado", "Publicado"], ["em_andamento", "Em andamento"], ["encerrado", "Encerrado"], ["suspenso", "Suspenso"], ["archived", "Arquivado"]]],
+      ["file_url", "Arquivo PDF", "upload-doc", "span2"],
       ["description", "Descricao", "textarea", "span2"],
     ],
   },
   usuarios: {
     endpoint: "usuarios.php",
     saveEndpoint: "usuarios.php",
-    title: "Usuarios do Painel",
+    title: "Usuarios e Permissoes",
+    subtitle: "Acessos autorizados para o painel administrativo.",
     empty: "Nenhum usuario cadastrado.",
+    primary: "name",
     columns: [
       ["name", "Nome"],
       ["email", "E-mail"],
@@ -149,8 +163,8 @@ const crud = {
       ["active", "Status", "active"],
     ],
     fields: [
-      ["name", "Nome", "text"],
-      ["email", "E-mail", "text"],
+      ["name", "Nome", "text", "", "", true],
+      ["email", "E-mail", "text", "", "", true],
       ["password", "Senha", "password"],
       ["role", "Perfil", "select", "", [["admin", "Admin"], ["editor", "Editor"]]],
       ["active", "Status", "select", "", [["1", "Ativo"], ["0", "Inativo"]]],
@@ -173,17 +187,37 @@ function esc(value) {
 
 function dateBR(value) {
   if (!value) return "-";
-  const date = new Date(String(value).replace(" ", "T"));
+  const raw = String(value).trim();
+  const parts = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+  if (parts) {
+    return `${parts[3]}/${parts[2]}/${parts[1]}`;
+  }
+  const date = new Date(raw.replace(" ", "T"));
   return Number.isNaN(date.getTime()) ? esc(value) : date.toLocaleDateString("pt-BR");
 }
 
 function inputDate(value) {
-  if (!value) return "";
-  return String(value).slice(0, 10);
+  return value ? String(value).slice(0, 10) : "";
 }
 
 function endpointFor(key) {
   return crud[key].saveEndpoint || crud[key].endpoint;
+}
+
+function pageTitle(page) {
+  return sections[page] || page;
+}
+
+function normalizeSearch(value) {
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function assetUrl(value) {
+  const path = String(value || "").trim();
+  if (!path) return "";
+  if (/^(https?:|data:|blob:|mailto:|tel:|#)/i.test(path)) return path;
+  if (path.startsWith("/")) return path;
+  return "../" + path.replace(/^\.\.\//, "").replace(/^\.\//, "");
 }
 
 function toast(message, type = "info") {
@@ -198,26 +232,34 @@ function toast(message, type = "info") {
   el.className = "toast t-" + ({ success: "success", error: "error", warning: "warning", info: "info", s: "success", e: "error", w: "warning" }[type] || type);
   el.textContent = message;
   wrap.appendChild(el);
-  setTimeout(() => { el.classList.add("fo"); setTimeout(() => el.remove(), 320); }, 2800);
+  setTimeout(() => { el.classList.add("fo"); setTimeout(() => el.remove(), 320); }, 3000);
 }
 
 async function api(path, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (options.body && !(options.body instanceof FormData)) headers["Content-Type"] = "application/json";
   const response = await fetch(API_BASE + path, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
+    headers,
   });
   const text = await response.text();
   let json = null;
   try {
     json = text ? JSON.parse(text) : null;
   } catch (_) {
-    throw new Error("Resposta invalida da API.");
+    throw new Error("A API retornou uma resposta invalida.");
   }
   if (!response.ok || (json && json.ok === false)) {
     throw new Error((json && json.error) || "Erro HTTP " + response.status);
   }
   return json;
+}
+
+async function uploadFile(file) {
+  const form = new FormData();
+  form.append("file", file);
+  return api("upload.php", { method: "POST", body: form });
 }
 
 async function checkAuth() {
@@ -228,18 +270,18 @@ async function checkAuth() {
 
 function renderLogin(error = "") {
   document.body.innerHTML = `
-    <main class="auth-page" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at top,rgba(46,204,64,.12),transparent 34%),var(--bg)">
-      <section class="auth-card" style="width:min(420px,100%);background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:30px;box-shadow:var(--s1)">
-        <div class="auth-mark" style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#14831f,#20b932);display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:18px">VP</div>
-        <h1 style="margin:0 0 8px;font-size:28px;text-transform:uppercase">Painel Administrativo</h1>
-        <p style="margin:0 0 22px;color:var(--txt2);line-height:1.5">Camara Municipal de Vargem Grande do Rio Pardo</p>
+    <main class="auth-page">
+      <section class="auth-card">
+        <div class="auth-mark">VP</div>
+        <h1>Painel Administrativo</h1>
+        <p>Camara Municipal de Vargem Grande do Rio Pardo</p>
         ${error ? `<div class="alert">${esc(error)}</div>` : ""}
-        <form id="login-form" class="auth-form" style="display:flex;flex-direction:column;gap:10px">
+        <form id="login-form" class="auth-form">
           <label>E-mail</label>
           <input class="fc" name="email" type="email" autocomplete="username" required>
           <label>Senha</label>
           <input class="fc" name="password" type="password" autocomplete="current-password" required>
-          <button class="btn btn-p" type="submit" style="margin-top:8px;justify-content:center">Entrar</button>
+          <button class="btn btn-p btn-full" type="submit">Entrar</button>
         </form>
       </section>
     </main>
@@ -272,6 +314,7 @@ function menuGroup(title, items) {
     <button class="ni" type="button" data-page="${item[0]}">
       <span class="ni-ico">${item[1]}</span>
       <span class="ni-lbl">${item[2]}</span>
+      ${item[3] ? `<span class="nbdg" id="${item[3]}">0</span>` : ""}
     </button>
   `).join("");
 }
@@ -291,10 +334,10 @@ function renderShell() {
           <div class="usr-dot"></div>
         </div>
         <nav class="sb-nav">
-          ${menuGroup("VISÃO GERAL", [["dashboard", "▦", "Dashboard"]])}
-          ${menuGroup("GESTÃO DO SITE", [["noticias", "▣", "Noticias"], ["vereadores", "●", "Vereadores"], ["diario", "▤", "Diario Oficial"], ["legislacao", "§", "Legislacao"], ["concursos", "▥", "Concursos"]])}
-          ${menuGroup("ATENDIMENTO", [["esic", "?", "e-SIC"], ["ouvidoria", "!", "Ouvidoria"]])}
-          ${menuGroup("SISTEMA", [["config", "⚙", "Configuracoes"], ["usuarios", "◉", "Usuarios"]])}
+          ${menuGroup("Visao geral", [["dashboard", "D", "Dashboard"]])}
+          ${menuGroup("Gestao do site", [["noticias", "N", "Noticias", "bdg-noticias"], ["vereadores", "V", "Vereadores"], ["diario", "DO", "Diario Oficial"], ["legislacao", "L", "Legislacao"], ["concursos", "C", "Concursos"]])}
+          ${menuGroup("Atendimento", [["esic", "?", "e-SIC", "bdg-esic"], ["ouvidoria", "!", "Ouvidoria", "bdg-ouvidoria"]])}
+          ${menuGroup("Sistema", [["config", "*", "Configuracoes"], ["usuarios", "U", "Usuarios"]])}
         </nav>
       </aside>
       <main class="main">
@@ -302,7 +345,7 @@ function renderShell() {
           <div class="tb-bc"><span>Painel</span><span>/</span><span class="cur" id="bc-cur">Dashboard</span></div>
           <div class="tb-acts">
             <button class="tb-ico" type="button" title="Atualizar" onclick="refreshCurrent()">↻</button>
-            <button class="tb-ico" type="button" title="Abrir site" onclick="location.href='../'">↗</button>
+            <button class="tb-ico" type="button" title="Abrir site" onclick="window.open('../', '_blank')">↗</button>
             <button class="tb-ico" type="button" title="Sair" onclick="logout()">×</button>
           </div>
         </header>
@@ -327,14 +370,14 @@ async function go(page) {
   state.current = page;
   $all(".ni").forEach((item) => item.classList.toggle("act", item.dataset.page === page));
   const current = $("#bc-cur");
-  if (current) current.textContent = sections[page] || page;
+  if (current) current.textContent = pageTitle(page);
   history.replaceState({ page }, "", "#" + page);
   await renderPage(page);
 }
 
 async function refreshCurrent() {
   await renderPage(state.current);
-  toast("Atualizado", "success");
+  toast("Atualizado.", "success");
 }
 
 async function safeLoad(key, loader) {
@@ -342,7 +385,7 @@ async function safeLoad(key, loader) {
     return await loader();
   } catch (error) {
     console.warn(key, error);
-    toast("Nao foi possivel carregar " + (sections[key] || key) + ": " + error.message, "warning");
+    toast("Nao foi possivel carregar " + pageTitle(key) + ": " + error.message, "warning");
     state.data[key] = key === "settings" ? {} : [];
     return state.data[key];
   }
@@ -355,7 +398,7 @@ async function loadCrud(key) {
 }
 
 async function loadRequests(key) {
-  const json = await api((key === "esic" ? "esic.php" : "ouvidoria.php"));
+  const json = await api(key === "esic" ? "esic.php" : "ouvidoria.php");
   state.data[key] = json.data || [];
   return state.data[key];
 }
@@ -366,8 +409,22 @@ async function loadSettings() {
   return state.data.settings;
 }
 
-function stat(icon, value, label) {
-  return `<div class="scard"><div class="sc-ico">${icon}</div><div class="sc-num">${esc(value)}</div><div class="sc-lbl">${esc(label)}</div></div>`;
+function updateBadges() {
+  const news = $("#bdg-noticias");
+  const esic = $("#bdg-esic");
+  const ouv = $("#bdg-ouvidoria");
+  if (news) news.textContent = state.data.noticias.filter((item) => item.status === "draft").length || "";
+  if (esic) esic.textContent = state.data.esic.filter((item) => item.status !== "respondido" && item.status !== "arquivado").length || "";
+  if (ouv) ouv.textContent = state.data.ouvidoria.filter((item) => item.status !== "respondido" && item.status !== "arquivado").length || "";
+}
+
+function stat(icon, value, label, page) {
+  return `<button class="scard" type="button" onclick="go('${page}')"><div class="sc-ico">${esc(icon)}</div><div class="sc-num">${esc(value)}</div><div class="sc-lbl">${esc(label)}</div></button>`;
+}
+
+function quickButton(label, page, modalKey = "") {
+  const action = modalKey ? `go('${page}').then(()=>openCrudModal('${modalKey}'))` : `go('${page}')`;
+  return `<button class="btn btn-s btn-full" type="button" onclick="${action}">${esc(label)}</button>`;
 }
 
 async function renderDashboard() {
@@ -380,45 +437,126 @@ async function renderDashboard() {
     safeLoad("esic", () => loadRequests("esic")),
     safeLoad("ouvidoria", () => loadRequests("ouvidoria")),
   ]);
+  updateBadges();
+
+  const openEsic = state.data.esic.filter((item) => item.status !== "respondido" && item.status !== "arquivado").length;
+  const openOuv = state.data.ouvidoria.filter((item) => item.status !== "respondido" && item.status !== "arquivado").length;
+  const lastNews = state.data.noticias.slice(0, 5);
 
   $("#view").innerHTML = `
-    <div class="ph"><div><h1>Dashboard <em>Geral</em></h1><p>Resumo dos dados publicados no site e recebidos pelo atendimento.</p></div></div>
+    <div class="ph">
+      <div><h1>Bem-vindo ao <em>Painel</em></h1><p>Resumo dos dados publicados no site e recebidos pelo atendimento.</p></div>
+      <div class="ph-acts">
+        <button class="btn btn-s" onclick="go('diario').then(()=>openCrudModal('diario'))">Nova edicao DO</button>
+        <button class="btn btn-p" onclick="go('noticias').then(()=>openCrudModal('noticias'))">Nova noticia</button>
+      </div>
+    </div>
+    <div class="notice ok"><strong>Sistema operacional.</strong><span> O painel esta ligado ao backend. Cadastre os dados reais e eles aparecem no site publico.</span></div>
     <div class="stat-grid">
-      ${stat("N", state.data.noticias.length, "Noticias")}
-      ${stat("V", state.data.vereadores.length, "Vereadores")}
-      ${stat("D", state.data.diario.length, "Diarios")}
-      ${stat("L", state.data.legislacao.length, "Leis")}
-      ${stat("C", state.data.concursos.length, "Concursos")}
-      ${stat("S", state.data.esic.filter((item) => item.status !== "respondido").length, "e-SIC abertos")}
-      ${stat("O", state.data.ouvidoria.filter((item) => item.status !== "respondido").length, "Ouvidoria aberta")}
+      ${stat("V", state.data.vereadores.length, "Vereadores", "vereadores")}
+      ${stat("N", state.data.noticias.length, "Noticias", "noticias")}
+      ${stat("D", state.data.diario.length, "Edicoes DO", "diario")}
+      ${stat("L", state.data.legislacao.length, "Leis e atos", "legislacao")}
+      ${stat("C", state.data.concursos.length, "Concursos", "concursos")}
+      ${stat("S", openEsic, "e-SIC abertos", "esic")}
+      ${stat("O", openOuv, "Ouvidoria aberta", "ouvidoria")}
+    </div>
+    <div class="dash-grid">
+      <div class="tw">
+        <div class="th"><div class="tt">Acoes rapidas</div></div>
+        <div class="action-list">
+          ${quickButton("Gerenciar vereadores", "vereadores")}
+          ${quickButton("Publicar noticia", "noticias", "noticias")}
+          ${quickButton("Nova edicao do Diario Oficial", "diario", "diario")}
+          ${quickButton("Cadastrar lei ou decreto", "legislacao", "legislacao")}
+          ${quickButton("Responder e-SIC", "esic")}
+          ${quickButton("Configuracoes da Camara", "config")}
+        </div>
+      </div>
+      <div class="tw">
+        <div class="th"><div class="tt">Checklist TAC / MP</div></div>
+        <div class="check-list">
+          ${checkItem("ok", "Acesso publico e menu de transparencia")}
+          ${checkItem("ok", "LAI, Diario Oficial, legislacao e atendimento")}
+          ${checkItem(state.data.settings.phone && state.data.settings.email && state.data.settings.address ? "ok" : "warn", "Contato institucional preenchido")}
+          ${checkItem(state.data.vereadores.length ? "ok" : "warn", "Vereadores cadastrados")}
+          ${checkItem(state.data.legislacao.length ? "ok" : "warn", "Leis reais cadastradas")}
+          ${checkItem("ok", "Receitas, despesas e RH vinculados ao portal oficial")}
+        </div>
+      </div>
     </div>
     <div class="tw">
       <div class="th"><div class="tt">Ultimas noticias</div><button class="btn btn-p" onclick="go('noticias')">Gerenciar</button></div>
-      ${tableFor("noticias", state.data.noticias.slice(0, 5))}
+      ${tableFor("noticias", lastNews, true)}
     </div>
   `;
 }
 
+function checkItem(type, text) {
+  return `<div class="check ${type}"><span>${type === "ok" ? "OK" : "!"}</span><strong>${esc(text)}</strong></div>`;
+}
+
+function statusBadge(value) {
+  const status = String(value || "").toLowerCase();
+  const ok = ["published", "publicado", "respondido", "ativo", "em_andamento"].includes(status);
+  const warn = ["draft", "rascunho", "novo", "suspenso"].includes(status);
+  const label = {
+    published: "Publicado",
+    draft: "Rascunho",
+    archived: "Arquivado",
+    public: "Publicado",
+    novo: "Novo",
+    em_andamento: "Em andamento",
+    respondido: "Respondido",
+    arquivado: "Arquivado",
+  }[status] || value || "-";
+  return `<span class="sp ${ok ? "sp-ok" : warn ? "sp-pend" : "sp-err"}">${esc(label)}</span>`;
+}
+
+function partyBadge(value) {
+  if (!value) return "-";
+  return `<span class="sp sp-party">${esc(value)}</span>`;
+}
+
 function cellValue(value, type) {
   if (type === "date") return dateBR(value);
-  if (type === "status") return `<span class="sp ${value === "published" ? "sp-ok" : value === "draft" ? "sp-pend" : "sp-err"}">${value === "published" ? "Publicado" : value === "draft" ? "Rascunho" : esc(value || "-")}</span>`;
+  if (type === "status") return statusBadge(value);
+  if (type === "party") return partyBadge(value);
   if (type === "active") return `<span class="sp ${Number(value) !== 0 ? "sp-ok" : "sp-err"}">${Number(value) !== 0 ? "Ativo" : "Inativo"}</span>`;
   return esc(value || "-");
 }
 
-function tableFor(key, rows) {
+function rowAvatar(row, key) {
+  const value = key === "vereadores" ? row.photo_url : row.image_url;
+  const name = row.name || row.title || "?";
+  if (value) return `<img class="av-sm-img" src="${esc(assetUrl(value))}" alt="">`;
+  return `<div class="av-sm">${esc(name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?")}</div>`;
+}
+
+function filteredRows(key, rows) {
+  const query = normalizeSearch(state.filters[key] || "");
+  if (!query) return rows;
+  return rows.filter((row) => normalizeSearch(Object.values(row).join(" ")).includes(query));
+}
+
+function tableFor(key, rows, compact = false) {
   const cfg = crud[key];
-  if (!rows.length) return `<div class="panel-note">${esc(cfg.empty)}</div>`;
+  const filtered = filteredRows(key, rows);
+  if (!filtered.length) return `<div class="panel-note">${esc(cfg.empty)}</div>`;
   return `
     <table>
-      <thead><tr>${cfg.columns.map((col) => `<th>${esc(col[1])}</th>`).join("")}<th>Acoes</th></tr></thead>
+      <thead><tr>${key === "vereadores" ? "<th>Foto</th>" : ""}${cfg.columns.map((col) => `<th>${esc(col[1])}</th>`).join("")}<th>Acoes</th></tr></thead>
       <tbody>
-        ${rows.map((row) => `
+        ${filtered.map((row) => `
           <tr>
-            ${cfg.columns.map((col) => `<td class="${col[0] === cfg.columns[0][0] ? "tc" : ""}">${cellValue(row[col[0]], col[2])}</td>`).join("")}
+            ${key === "vereadores" ? `<td>${rowAvatar(row, key)}</td>` : ""}
+            ${cfg.columns.map((col) => `<td class="${col[0] === cfg.primary ? "tc" : ""}">${cellValue(row[col[0]], col[2])}</td>`).join("")}
             <td>
-              <button class="btn btn-s btn-sm" onclick="openCrudModal('${key}', ${Number(row.id)})">Editar</button>
-              <button class="btn btn-d btn-sm" onclick="removeCrud('${key}', ${Number(row.id)})">Excluir</button>
+              <div class="row-actions">
+                ${row.file_url ? `<button class="btn btn-s btn-sm" onclick="openAsset('${esc(assetUrl(row.file_url))}')">Abrir</button>` : ""}
+                ${!compact ? `<button class="btn btn-s btn-sm" onclick="openCrudModal('${key}', ${Number(row.id)})">Editar</button>
+                <button class="btn btn-d btn-sm" onclick="removeCrud('${key}', ${Number(row.id)})">Excluir</button>` : `<button class="btn btn-s btn-sm" onclick="go('${key}')">Ver</button>`}
+              </div>
             </td>
           </tr>
         `).join("")}
@@ -427,15 +565,35 @@ function tableFor(key, rows) {
   `;
 }
 
+function moduleStats(key, rows) {
+  const published = rows.filter((row) => ["published", "publicado"].includes(String(row.status || "").toLowerCase()) || Number(row.active) === 1).length;
+  const draft = rows.filter((row) => ["draft", "rascunho", "novo"].includes(String(row.status || "").toLowerCase())).length;
+  return `
+    <div class="mini-stats">
+      <div><strong>${rows.length}</strong><span>Total</span></div>
+      <div><strong>${published}</strong><span>Publicado/ativo</span></div>
+      <div><strong>${draft}</strong><span>Pendente</span></div>
+    </div>
+  `;
+}
+
 async function renderCrud(key) {
   const cfg = crud[key];
   const rows = await safeLoad(key, () => loadCrud(key));
+  updateBadges();
   $("#view").innerHTML = `
     <div class="ph">
-      <div><h1>${esc(cfg.title)} <em></em></h1><p>Dados salvos aqui aparecem no site publico.</p></div>
-      <button class="btn btn-p" onclick="openCrudModal('${key}')">+ Novo registro</button>
+      <div><h1>${esc(cfg.title)} <em></em></h1><p>${esc(cfg.subtitle)}</p></div>
+      <button class="btn btn-p" onclick="openCrudModal('${key}')">Novo registro</button>
     </div>
-    <div class="tw"><div class="th"><div class="tt">Lista</div></div>${tableFor(key, rows)}</div>
+    ${moduleStats(key, rows)}
+    <div class="tw">
+      <div class="th">
+        <div class="tt">Lista</div>
+        <div class="tf"><input class="fc search" value="${esc(state.filters[key] || "")}" placeholder="Buscar..." oninput="setFilter('${key}', this.value)"></div>
+      </div>
+      ${tableFor(key, rows)}
+    </div>
     ${modalCrud(key)}
   `;
 }
@@ -444,15 +602,16 @@ function modalCrud(key) {
   const cfg = crud[key];
   return `
     <div class="mo" id="mo-${key}">
-      <div class="md">
+      <div class="md md-wide">
         <div class="md-h"><h3>${esc(cfg.title)}</h3><button class="md-x" onclick="closeMo('mo-${key}')">×</button></div>
         <div class="md-b">
           <input type="hidden" id="${key}-id">
           <div class="fg">
-            ${cfg.fields.map(([name, label, type, span, options]) => fieldHtml(key, name, label, type, span, options)).join("")}
+            ${cfg.fields.map(([name, label, type, span, options, required]) => fieldHtml(key, name, label, type, span, options, required)).join("")}
           </div>
         </div>
         <div class="md-f">
+          ${key === "legislacao" ? `<button class="btn btn-s" onclick="previewLaw()">Preview</button>` : ""}
           <button class="btn btn-s" onclick="closeMo('mo-${key}')">Cancelar</button>
           <button class="btn btn-p" onclick="submitCrud('${key}')">Salvar</button>
         </div>
@@ -461,15 +620,39 @@ function modalCrud(key) {
   `;
 }
 
-function fieldHtml(key, name, label, type, span, options) {
+function fieldHtml(key, name, label, type, span, options, required) {
   const id = `${key}-${name}`;
+  const req = required ? " required" : "";
   if (type === "textarea") {
-    return `<div class="fgrp ${span || ""}"><label>${esc(label)}</label><textarea class="fc" id="${id}"></textarea></div>`;
+    return `<div class="fgrp ${span || ""}"><label>${esc(label)}${required ? " *" : ""}</label><textarea class="fc" id="${id}"${req}></textarea></div>`;
   }
   if (type === "select") {
-    return `<div class="fgrp ${span || ""}"><label>${esc(label)}</label><select class="fc" id="${id}">${(options || []).map(([value, text]) => `<option value="${esc(value)}">${esc(text)}</option>`).join("")}</select></div>`;
+    return `<div class="fgrp ${span || ""}"><label>${esc(label)}${required ? " *" : ""}</label><select class="fc" id="${id}"${req}>${(options || []).map(([value, text]) => `<option value="${esc(value)}">${esc(text)}</option>`).join("")}</select></div>`;
   }
-  return `<div class="fgrp ${span || ""}"><label>${esc(label)}</label><input class="fc" id="${id}" type="${esc(type || "text")}"></div>`;
+  if (type === "upload-image" || type === "upload-doc") {
+    const accept = type === "upload-image" ? "image/png,image/jpeg,image/webp,image/gif" : "application/pdf,.pdf,.doc,.docx";
+    const hint = type === "upload-image" ? "Enviar imagem ou colar URL" : "Enviar PDF/documento ou colar URL";
+    return `
+      <div class="fgrp ${span || ""}">
+        <label>${esc(label)}</label>
+        <div class="upload-row">
+          <input class="fc" id="${id}" type="text" placeholder="${hint}" oninput="updateUploadPreview('${key}', '${name}')">
+          <input id="${id}-file" type="file" accept="${accept}" hidden onchange="handleUpload('${key}', '${name}', this.files[0])">
+          <button class="btn btn-s" type="button" onclick="document.getElementById('${id}-file').click()">Upload</button>
+        </div>
+        <div class="upload-preview" id="${id}-preview"></div>
+      </div>
+    `;
+  }
+  return `<div class="fgrp ${span || ""}"><label>${esc(label)}${required ? " *" : ""}</label><input class="fc" id="${id}" type="${esc(type || "text")}"${req}></div>`;
+}
+
+function defaultFor(name) {
+  if (name === "status") return "published";
+  if (name === "active") return "1";
+  if (name === "legislature") return "2025-2028";
+  if (name === "display_order") return "0";
+  return "";
 }
 
 function openCrudModal(key, id) {
@@ -480,9 +663,44 @@ function openCrudModal(key, id) {
     if (!input) return;
     if (type === "date") input.value = inputDate(row[name]);
     else if (name === "password") input.value = "";
-    else input.value = row[name] ?? (name === "status" ? "published" : name === "active" ? "1" : "");
+    else input.value = row[name] ?? defaultFor(name);
+    if (type === "upload-image" || type === "upload-doc") updateUploadPreview(key, name);
   });
   openMo(`mo-${key}`);
+}
+
+async function handleUpload(key, name, file) {
+  if (!file) return;
+  const button = document.activeElement;
+  if (button) button.disabled = true;
+  try {
+    toast("Enviando arquivo...", "info");
+    const json = await uploadFile(file);
+    $(`#${key}-${name}`).value = json.url;
+    updateUploadPreview(key, name);
+    toast("Arquivo enviado com sucesso.", "success");
+  } catch (error) {
+    toast(error.message, "error");
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+function updateUploadPreview(key, name) {
+  const input = $(`#${key}-${name}`);
+  const target = $(`#${key}-${name}-preview`);
+  if (!input || !target) return;
+  const value = input.value.trim();
+  if (!value) {
+    target.innerHTML = "";
+    return;
+  }
+  const url = assetUrl(value);
+  if (/\.(png|jpe?g|webp|gif)$/i.test(value) || value.startsWith("data:image")) {
+    target.innerHTML = `<img src="${esc(url)}" alt="">`;
+  } else {
+    target.innerHTML = `<button class="btn btn-s btn-sm" type="button" onclick="openAsset('${esc(url)}')">Abrir arquivo</button><small>${esc(value)}</small>`;
+  }
 }
 
 async function submitCrud(key) {
@@ -493,8 +711,9 @@ async function submitCrud(key) {
     const input = $(`#${key}-${name}`);
     if (input) payload[name] = input.value;
   });
-  if (!payload.title && !payload.name) {
-    toast("Preencha os campos principais antes de salvar.", "warning");
+  const missing = cfg.fields.find(([name, label, , , , required]) => required && !String(payload[name] || "").trim());
+  if (missing) {
+    toast("Preencha: " + missing[1], "warning");
     return;
   }
   if (key === "usuarios" && !id && !payload.password) {
@@ -518,6 +737,19 @@ async function removeCrud(key, id) {
   await renderCrud(key);
 }
 
+function setFilter(key, value) {
+  state.filters[key] = value;
+  const wrap = $(".tw");
+  if (!wrap) return;
+  const cfg = crud[key];
+  const tableArea = wrap.lastElementChild;
+  if (tableArea) {
+    const html = tableFor(key, state.data[key]);
+    if (html.startsWith("<table")) tableArea.outerHTML = html;
+    else tableArea.outerHTML = html;
+  }
+}
+
 function requestTable(key, rows) {
   if (!rows.length) return `<div class="panel-note">Nenhum pedido recebido.</div>`;
   return `
@@ -530,10 +762,12 @@ function requestTable(key, rows) {
             <td>${dateBR(row.created_at)}</td>
             <td>${esc(row.requester_name || "-")}</td>
             <td>${esc(row.subject || row.type || "-")}</td>
-            <td><span class="sp ${row.status === "respondido" ? "sp-ok" : row.status === "arquivado" ? "sp-err" : "sp-pend"}">${esc(row.status || "novo")}</span></td>
+            <td>${statusBadge(row.status || "novo")}</td>
             <td>
-              <button class="btn btn-s btn-sm" onclick="openRequestModal('${key}', ${Number(row.id)})">Responder</button>
-              <button class="btn btn-d btn-sm" onclick="removeRequest('${key}', ${Number(row.id)})">Excluir</button>
+              <div class="row-actions">
+                <button class="btn btn-s btn-sm" onclick="openRequestModal('${key}', ${Number(row.id)})">Responder</button>
+                <button class="btn btn-d btn-sm" onclick="removeRequest('${key}', ${Number(row.id)})">Excluir</button>
+              </div>
             </td>
           </tr>
         `).join("")}
@@ -544,17 +778,21 @@ function requestTable(key, rows) {
 
 async function renderRequests(key) {
   const rows = await safeLoad(key, () => loadRequests(key));
+  updateBadges();
+  const open = rows.filter((row) => row.status !== "respondido" && row.status !== "arquivado").length;
   $("#view").innerHTML = `
-    <div class="ph"><div><h1>${esc(sections[key])} <em></em></h1><p>Pedidos recebidos pelo site publico.</p></div></div>
+    <div class="ph"><div><h1>${esc(pageTitle(key))} <em></em></h1><p>Solicitacoes recebidas pelo site publico.</p></div></div>
+    <div class="mini-stats"><div><strong>${rows.length}</strong><span>Total</span></div><div><strong>${open}</strong><span>Abertos</span></div><div><strong>${rows.length - open}</strong><span>Finalizados</span></div></div>
+    <div class="notice ${open ? "warn" : "ok"}"><strong>${open ? "Atencao." : "Tudo em dia."}</strong><span> ${open ? "Existem pedidos aguardando andamento ou resposta." : "Nao ha pedidos pendentes neste modulo."}</span></div>
     <div class="tw"><div class="th"><div class="tt">Solicitacoes</div></div>${requestTable(key, rows)}</div>
     <div class="mo" id="mo-request">
       <div class="md">
         <div class="md-h"><h3>Responder solicitacao</h3><button class="md-x" onclick="closeMo('mo-request')">×</button></div>
         <div class="md-b">
           <input type="hidden" id="request-key"><input type="hidden" id="request-id">
-          <div class="panel-note" id="request-summary"></div>
-          <div class="fg" style="margin-top:14px">
-            <div class="fgrp"><label>Status</label><select class="fc" id="request-status"><option value="em_andamento">Em andamento</option><option value="respondido">Respondido</option><option value="arquivado">Arquivado</option></select></div>
+          <div class="request-summary" id="request-summary"></div>
+          <div class="fg request-form">
+            <div class="fgrp"><label>Status</label><select class="fc" id="request-status"><option value="novo">Novo</option><option value="em_andamento">Em andamento</option><option value="respondido">Respondido</option><option value="arquivado">Arquivado</option></select></div>
             <div class="fgrp span2"><label>Resposta</label><textarea class="fc" id="request-response"></textarea></div>
           </div>
         </div>
@@ -572,9 +810,9 @@ function openRequestModal(key, id) {
   $("#request-status").value = row.status || "em_andamento";
   $("#request-response").value = row.response || "";
   $("#request-summary").innerHTML = `
-    <strong>${esc(row.protocol || row.id)} - ${esc(row.subject || row.type || "")}</strong><br>
-    ${esc(row.message || "")}<br>
-    <small>${esc(row.requester_email || "")} ${esc(row.requester_phone || "")}</small>
+    <strong>${esc(row.protocol || row.id)} - ${esc(row.subject || row.type || "")}</strong>
+    <p>${esc(row.message || "")}</p>
+    <small>${esc(row.requester_name || "")} ${esc(row.requester_email || "")} ${esc(row.requester_phone || "")}</small>
   `;
   openMo("mo-request");
 }
@@ -603,21 +841,23 @@ async function removeRequest(key, id) {
 
 async function renderSettings() {
   const settings = await safeLoad("settings", loadSettings);
-  const defaults = {
-    site_name: "Camara Municipal de Vargem Grande do Rio Pardo",
-    city: "Vargem Grande do Rio Pardo",
-    state: "MG",
-    legislature: "2025-2028",
-    phone: "",
-    email: "",
-    address: "",
-    opening_hours: "",
-  };
-  const merged = { ...defaults, ...settings };
+  const fields = [
+    ["site_name", "Nome da Camara", "Camara Municipal de Vargem Grande do Rio Pardo"],
+    ["city", "Municipio", "Vargem Grande do Rio Pardo"],
+    ["state", "UF", "MG"],
+    ["legislature", "Legislatura", "2025-2028"],
+    ["cnpj", "CNPJ", ""],
+    ["phone", "Telefone", ""],
+    ["email", "E-mail institucional", ""],
+    ["opening_hours", "Horario de atendimento", ""],
+    ["address", "Endereco completo", ""],
+    ["ordinary_sessions", "Sessoes ordinarias", ""],
+  ];
   $("#view").innerHTML = `
-    <div class="ph"><div><h1>Configuracoes <em></em></h1><p>Dados institucionais usados pelo site.</p></div><button class="btn btn-p" onclick="saveSettings()">Salvar</button></div>
+    <div class="ph"><div><h1>Configuracoes <em></em></h1><p>Dados institucionais usados pelo site e pelo painel.</p></div><button class="btn btn-p" onclick="saveSettings()">Salvar</button></div>
+    <div class="notice warn"><strong>Obrigatorio.</strong><span> Preencha endereco, telefone, e-mail e horario real antes de publicar oficialmente.</span></div>
     <div class="card"><div class="fg">
-      ${Object.entries(merged).map(([key, value]) => `<div class="fgrp ${key === "address" ? "span2" : ""}"><label>${esc(key)}</label><input class="fc setting-field" data-key="${esc(key)}" value="${esc(value)}"></div>`).join("")}
+      ${fields.map(([key, label, fallback]) => `<div class="fgrp ${key === "address" || key === "ordinary_sessions" ? "span2" : ""}"><label>${esc(label)}</label><input class="fc setting-field" data-key="${esc(key)}" value="${esc(settings[key] ?? fallback)}"></div>`).join("")}
     </div></div>
   `;
 }
@@ -627,6 +867,23 @@ async function saveSettings() {
   $all(".setting-field").forEach((field) => settings[field.dataset.key] = field.value);
   await api("settings.php", { method: "PUT", body: JSON.stringify({ settings }) });
   toast("Configuracoes salvas.", "success");
+}
+
+function previewLaw() {
+  const title = $("#legislacao-title")?.value || "";
+  const number = $("#legislacao-law_number")?.value || "";
+  const type = $("#legislacao-law_type")?.value || "";
+  const summary = $("#legislacao-summary")?.value || "";
+  const content = $("#legislacao-content")?.value || "";
+  const text = `${type} ${number}\n\n${title}\n\nEMENTA: ${summary}\n\n${content}`.trim();
+  const win = window.open("", "_blank");
+  if (!win) return toast("Permita pop-ups para abrir o preview.", "warning");
+  win.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.6;padding:28px">${esc(text)}</pre>`);
+  win.document.close();
+}
+
+function openAsset(url) {
+  window.open(url, "_blank");
 }
 
 async function renderPage(page) {
@@ -689,6 +946,11 @@ window.removeRequest = removeRequest;
 window.openMo = openMo;
 window.closeMo = closeMo;
 window.saveSettings = saveSettings;
+window.handleUpload = handleUpload;
+window.updateUploadPreview = updateUploadPreview;
+window.setFilter = setFilter;
+window.previewLaw = previewLaw;
+window.openAsset = openAsset;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initAdmin);
