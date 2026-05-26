@@ -529,7 +529,7 @@ function cellValue(value, type) {
 function rowAvatar(row, key) {
   const value = key === "vereadores" ? row.photo_url : row.image_url;
   const name = row.name || row.title || "?";
-  if (value) return `<img class="av-sm-img" src="${esc(assetUrl(value))}" alt="">`;
+  if (value) return `<img class="av-sm-img" src="${esc(assetUrl(value))}" alt="" style="width:42px;height:42px;max-width:42px;max-height:42px;object-fit:cover;border-radius:12px;display:block">`;
   return `<div class="av-sm">${esc(name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?")}</div>`;
 }
 
@@ -549,7 +549,7 @@ function tableFor(key, rows, compact = false) {
       <tbody>
         ${filtered.map((row) => `
           <tr>
-            ${key === "vereadores" ? `<td>${rowAvatar(row, key)}</td>` : ""}
+            ${key === "vereadores" ? `<td class="photo-cell">${rowAvatar(row, key)}</td>` : ""}
             ${cfg.columns.map((col) => `<td class="${col[0] === cfg.primary ? "tc" : ""}">${cellValue(row[col[0]], col[2])}</td>`).join("")}
             <td>
               <div class="row-actions">
