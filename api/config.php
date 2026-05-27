@@ -1,9 +1,0 @@
-<?php
-return [
-  'db_host' => 'localhost',
-  'db_port' => '3306',
-  'db_name' => 'camaravgp',
-  'db_user' => 'usercamara',
-  'db_pass' => 'B4hb4hb4h@@',
-  'session_name' => 'camaravp_admin',
-];
