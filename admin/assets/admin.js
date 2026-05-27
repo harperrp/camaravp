@@ -4,9 +4,6 @@ const state = {
   current: "dashboard",
   user: null,
   filters: {},
-  lawArticles: [],
-  lawPdfFileName: "",
-  lawPdfFileSize: 0,
   data: {
     noticias: [],
     vereadores: [],
@@ -121,13 +118,13 @@ const crud = {
     ],
     fields: [
       ["file_url", "Anexar PDF da Lei", "law-pdf", "span2"],
-      ["law_type", "Tipo", "select", "", [["Lei Ordinaria", "Lei Ordinaria"], ["Lei Complementar", "Lei Complementar"], ["Decreto", "Decreto"], ["Decreto Legislativo", "Decreto Legislativo"], ["Resolucao", "Resolucao"], ["Portaria", "Portaria"], ["Emenda a Lei Organica", "Emenda a Lei Organica"]]],
+      ["law_type", "Tipo", "select", "", [["Lei Ordinaria", "Lei Ordinaria"], ["Lei Complementar", "Lei Complementar"], ["Decreto Legislativo", "Decreto Legislativo"], ["Resolucao", "Resolucao"], ["Portaria", "Portaria"], ["Emenda a Lei Organica", "Emenda a Lei Organica"]]],
       ["law_number", "Numero / Ano", "text", "", "", true],
       ["publication_date", "Data de publicacao", "date"],
       ["status", "Situacao", "select", "", [["published", "Vigente"], ["draft", "Rascunho"], ["archived", "Revogada / Arquivada"]]],
       ["summary", "Ementa", "text", "span2", "", true],
       ["related_laws", "Vinculacoes", "text", "span2"],
-      ["content", "Artigos da Lei", "law-articles", "span2"],
+      ["content", "Artigos da Lei", "textarea", "span2 tall"],
     ],
   },
   concursos: {
@@ -606,7 +603,7 @@ function modalCrud(key) {
   const cfg = crud[key];
   return `
     <div class="mo" id="mo-${key}">
-      <div class="md md-wide ${key === "legislacao" ? "law-md" : ""}">
+      <div class="md md-wide">
         <div class="md-h"><h3>${esc(cfg.modalTitle || cfg.title)}</h3><button class="md-x" onclick="closeMo('mo-${key}')">×</button></div>
         <div class="md-b">
           <input type="hidden" id="${key}-id">
@@ -631,33 +628,17 @@ function fieldHtml(key, name, label, type, span, options, required) {
     return `
       <div class="fgrp ${span || ""}">
         <label>${esc(label)}</label>
-        <div class="law-upload" onclick="document.getElementById('${id}-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleLawPdfDrop(event)">
-          <div class="law-upload-ico">PDF</div>
-          <strong>Anexar PDF original</strong>
-          <span>O painel salva o arquivo intacto e tenta separar o texto em artigos editaveis.</span>
-          <div class="law-upload-status" id="${id}-status"></div>
+        <div class="law-upload" onclick="document.getElementById('${id}-file').click()" style="border:2px dashed var(--border2);border-radius:14px;padding:28px 18px;text-align:center;cursor:pointer;background:rgba(46,204,64,.035);display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div class="law-upload-ico" style="width:42px;height:42px;border-radius:12px;background:rgba(46,204,64,.12);display:flex;align-items:center;justify-content:center;color:var(--g5);font-weight:900">PDF</div>
+          <strong style="text-transform:uppercase">Anexar PDF da Lei</strong>
+          <span style="max-width:460px;color:var(--txt3);font-size:13px;line-height:1.4">Arraste o PDF aqui ou clique para selecionar. O arquivo fica disponivel para baixar no site.</span>
         </div>
         <div class="upload-row">
           <input class="fc" id="${id}" type="text" placeholder="URL do PDF ou arquivo enviado" oninput="updateUploadPreview('${key}', '${name}')">
-          <input id="${id}-file" type="file" accept="application/pdf,.pdf" hidden onchange="handleLawPdfUpload(this.files[0])">
+          <input id="${id}-file" type="file" accept="application/pdf,.pdf" hidden onchange="handleUpload('${key}', '${name}', this.files[0])">
           <button class="btn btn-s" type="button" onclick="document.getElementById('${id}-file').click()">Upload</button>
         </div>
         <div class="upload-preview" id="${id}-preview"></div>
-      </div>
-    `;
-  }
-  if (type === "law-articles") {
-    return `
-      <div class="fgrp ${span || ""}">
-        <div class="law-articles-head">
-          <label>${esc(label)}</label>
-          <div class="law-article-actions">
-            <span class="law-article-count" id="${id}-count">0 artigos</span>
-            <button class="btn btn-s btn-sm" type="button" onclick="addLawArticle()">+ Artigo</button>
-          </div>
-        </div>
-        <textarea class="fc law-content-hidden" id="${id}" aria-hidden="true" tabindex="-1"></textarea>
-        <div class="law-articles" id="${id}-cards"></div>
       </div>
     `;
   }
@@ -705,7 +686,6 @@ function openCrudModal(key, id) {
     else input.value = row[name] ?? defaultFor(name);
     if (type === "upload-image" || type === "upload-doc" || type === "law-pdf") updateUploadPreview(key, name);
   });
-  if (key === "legislacao") hydrateLawEditor(row);
   openMo(`mo-${key}`);
 }
 
@@ -743,337 +723,6 @@ function updateUploadPreview(key, name) {
   }
 }
 
-function setLawUploadStatus(message, type = "info") {
-  const target = $("#legislacao-file_url-status");
-  if (!target) return;
-  target.textContent = message || "";
-  target.className = "law-upload-status " + type;
-}
-
-function lawArticleHeading(index) {
-  return "Art. " + (index + 1);
-}
-
-function normalizeLawArticleHeading(value, index) {
-  const clean = String(value || "").trim();
-  return clean || lawArticleHeading(index);
-}
-
-function composeLawContent(articles = state.lawArticles) {
-  return (articles || []).map((article, index) => {
-    const heading = normalizeLawArticleHeading(article.heading, index);
-    const text = String(article.text || "").trim();
-    return text ? heading + "\n" + text : heading;
-  }).join("\n\n").trim();
-}
-
-function updateLawContentField() {
-  const input = $("#legislacao-content");
-  if (input) input.value = composeLawContent();
-  const count = $("#legislacao-content-count");
-  if (count) {
-    const total = state.lawArticles.length;
-    count.textContent = total + " artigo" + (total === 1 ? "" : "s");
-  }
-}
-
-function collectLawArticles() {
-  const cards = $all("#legislacao-content-cards .law-article-card");
-  state.lawArticles = cards.map((card, index) => ({
-    heading: normalizeLawArticleHeading($("[data-law-heading]", card)?.value, index),
-    text: String($("[data-law-text]", card)?.value || "").trim(),
-  }));
-  updateLawContentField();
-  return state.lawArticles;
-}
-
-function renderLawArticles(articles = []) {
-  state.lawArticles = articles.map((article, index) => ({
-    heading: normalizeLawArticleHeading(article.heading || article.art, index),
-    text: String(article.text || article.texto || "").trim(),
-  }));
-  const target = $("#legislacao-content-cards");
-  if (!target) return;
-  if (!state.lawArticles.length) {
-    target.innerHTML = `
-      <div class="law-empty">
-        <strong>Nenhum artigo cadastrado ainda.</strong>
-        <span>Use o PDF para tentar separar automaticamente ou adicione os artigos manualmente.</span>
-      </div>
-    `;
-    updateLawContentField();
-    return;
-  }
-  target.innerHTML = state.lawArticles.map((article, index) => `
-    <article class="law-article-card" data-index="${index}">
-      <div class="law-article-top">
-        <input class="fc law-article-title" data-law-heading value="${esc(normalizeLawArticleHeading(article.heading, index))}" oninput="syncLawArticles()">
-        <div class="law-article-tools">
-          <button class="btn btn-s btn-sm" type="button" onclick="moveLawArticle(${index}, -1)">Subir</button>
-          <button class="btn btn-s btn-sm" type="button" onclick="moveLawArticle(${index}, 1)">Descer</button>
-          <button class="btn btn-d btn-sm" type="button" onclick="removeLawArticle(${index})">Excluir</button>
-        </div>
-      </div>
-      <textarea class="fc law-article-text" data-law-text oninput="syncLawArticles()" placeholder="Texto deste artigo...">${esc(article.text)}</textarea>
-    </article>
-  `).join("");
-  updateLawContentField();
-}
-
-function syncLawArticles() {
-  collectLawArticles();
-}
-
-function addLawArticle() {
-  collectLawArticles();
-  state.lawArticles.push({ heading: lawArticleHeading(state.lawArticles.length), text: "" });
-  renderLawArticles(state.lawArticles);
-  const cards = $all("#legislacao-content-cards .law-article-card");
-  const last = cards[cards.length - 1];
-  if (last) {
-    last.scrollIntoView({ block: "nearest" });
-    const textarea = $("[data-law-text]", last);
-    if (textarea) textarea.focus();
-  }
-}
-
-function removeLawArticle(index) {
-  if (!confirm("Excluir este artigo?")) return;
-  collectLawArticles();
-  state.lawArticles.splice(index, 1);
-  renderLawArticles(state.lawArticles);
-}
-
-function moveLawArticle(index, dir) {
-  collectLawArticles();
-  const next = index + dir;
-  if (next < 0 || next >= state.lawArticles.length) return;
-  const current = state.lawArticles[index];
-  state.lawArticles[index] = state.lawArticles[next];
-  state.lawArticles[next] = current;
-  renderLawArticles(state.lawArticles);
-}
-
-function parseLawArticlesFromText(text) {
-  const source = String(text || "").replace(/\r/g, "").trim();
-  if (!source) return [];
-  const pattern = /(^|\n)\s*((?:Art\.?|Artigo)\s*\d+[A-Za-z\u00ba\u00b0]*(?:-[A-Za-z])?\.?)/gi;
-  const matches = Array.from(source.matchAll(pattern));
-  if (!matches.length) return [];
-  return matches.map((match, index) => {
-    const next = matches[index + 1];
-    const start = match.index + match[0].length;
-    const end = next ? next.index : source.length;
-    const heading = match[2]
-      .replace(/^Artigo\s+/i, "Art. ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .replace(/[.\s]+$/, "");
-    return {
-      heading,
-      text: source.slice(start, end).trim(),
-    };
-  }).filter((article) => article.heading);
-}
-
-function cleanExtractedLawText(raw) {
-  const lines = String(raw || "").replace(/\r/g, "").split("\n");
-  const cleaned = [];
-  let previousBlank = false;
-  const isNoise = (line) => {
-    const normalized = normalizeSearch(line).replace(/\s+/g, " ").trim();
-    if (!normalized) return false;
-    if (normalized.length <= 2) return true;
-    if (/^\d{1,3}$/.test(normalized)) return true;
-    if (/^pagina\s+\d+/.test(normalized) || /^\d+\s*(\/|de)\s*\d+$/.test(normalized)) return true;
-    if (/^(cep|cnpj|telefone|fone|email|e-mail)\b/.test(normalized)) return true;
-    if (/^(www\.|https?:\/\/)/.test(normalized)) return true;
-    if (/^(rua|avenida|av\.|praca|travessa)\s+/.test(normalized) && normalized.length < 90) return true;
-    if (/^(camara|prefeitura|municipio)\s+(municipal\s+)?/.test(normalized) && normalized.length < 90) return true;
-    if (/^(documento|sistema)\s+(assinado|gerado|de gestao|de transparencia)/.test(normalized)) return true;
-    if (/^[-_=*]{3,}$/.test(normalized)) return true;
-    return false;
-  };
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    if (isNoise(trimmed)) return;
-    if (!trimmed) {
-      if (!previousBlank) cleaned.push("");
-      previousBlank = true;
-      return;
-    }
-    previousBlank = false;
-    cleaned.push(trimmed);
-  });
-  return cleaned.join("\n").replace(/\n{3,}/g, "\n\n").trim();
-}
-
-function formatDateInput(day, month, year) {
-  return String(year).padStart(4, "0") + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
-}
-
-function applyLawMetadata(text) {
-  const normalized = normalizeSearch(text);
-  const typeInput = $("#legislacao-law_type");
-  const numberInput = $("#legislacao-law_number");
-  const dateInputEl = $("#legislacao-publication_date");
-  const summaryInput = $("#legislacao-summary");
-
-  if (typeInput) {
-    let detected = "Lei Ordinaria";
-    if (normalized.includes("lei complementar")) detected = "Lei Complementar";
-    else if (normalized.includes("decreto legislativo")) detected = "Decreto Legislativo";
-    else if (normalized.includes("decreto")) detected = "Decreto";
-    else if (normalized.includes("resolucao")) detected = "Resolucao";
-    else if (normalized.includes("portaria")) detected = "Portaria";
-    const option = Array.from(typeInput.options).find((item) => normalizeSearch(item.value) === normalizeSearch(detected));
-    if (option) typeInput.value = option.value;
-  }
-
-  if (numberInput && !numberInput.value.trim()) {
-    const numberMatch = text.match(/(?:lei|decreto|resolu[cç][aã]o|portaria|emenda)[^\n]{0,90}?n[\u00ba\u00b0o.]?\s*([0-9.]+(?:\s*[\/.-]\s*\d{4})?)/i)
-      || text.match(/\bn[\u00ba\u00b0o.]?\s*([0-9.]+\s*\/\s*\d{4})/i);
-    if (numberMatch) numberInput.value = numberMatch[1].replace(/\s+/g, "").replace(".", "");
-  }
-
-  if (dateInputEl && !dateInputEl.value) {
-    const slashDate = text.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/);
-    const monthNames = { janeiro: 1, fevereiro: 2, marco: 3, abril: 4, maio: 5, junho: 6, julho: 7, agosto: 8, setembro: 9, outubro: 10, novembro: 11, dezembro: 12 };
-    const writtenDate = normalized.match(/\b(\d{1,2})\s+de\s+(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+de\s+(\d{4})\b/);
-    if (slashDate) dateInputEl.value = formatDateInput(slashDate[1], slashDate[2], slashDate[3]);
-    else if (writtenDate) dateInputEl.value = formatDateInput(writtenDate[1], monthNames[writtenDate[2]], writtenDate[3]);
-  }
-
-  if (summaryInput && !summaryInput.value.trim()) {
-    const firstArticle = text.search(/(^|\n)\s*(Art\.?|Artigo)\s*\d+/i);
-    const head = firstArticle > -1 ? text.slice(0, firstArticle) : text.slice(0, 900);
-    const summaryMatch = head.match(/ementa[:\s-]*([\s\S]{20,500})/i)
-      || head.match(/\b(disp[oõ]e|institui|autoriza|regulamenta|estabelece|altera)[\s\S]{20,420}/i);
-    if (summaryMatch) {
-      const summary = (summaryMatch[1] || summaryMatch[0]).replace(/\s+/g, " ").trim();
-      summaryInput.value = summary.slice(0, 500);
-    }
-  }
-}
-
-async function loadPdfJs() {
-  if (window.pdfjsLib) return window.pdfjsLib;
-  await new Promise((resolve, reject) => {
-    const existing = document.querySelector("script[data-pdfjs]");
-    if (existing) {
-      existing.addEventListener("load", resolve, { once: true });
-      existing.addEventListener("error", reject, { once: true });
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-    script.dataset.pdfjs = "1";
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-  return window.pdfjsLib;
-}
-
-async function extractTextFromPdf(file) {
-  const pdfjs = await loadPdfJs();
-  const data = new Uint8Array(await file.arrayBuffer());
-  const pdf = await pdfjs.getDocument({ data }).promise;
-  const pages = [];
-  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-    setLawUploadStatus("Lendo pagina " + pageNumber + " de " + pdf.numPages + "...", "info");
-    const page = await pdf.getPage(pageNumber);
-    const content = await page.getTextContent({ includeMarkedContent: false });
-    const rows = [];
-    content.items.forEach((item) => {
-      const value = String(item.str || "").trim();
-      if (!value) return;
-      const transform = item.transform || [0, 0, 0, 0, 0, 0];
-      const x = transform[4] || 0;
-      const y = transform[5] || 0;
-      let row = rows.find((entry) => Math.abs(entry.y - y) < 3);
-      if (!row) {
-        row = { y, parts: [] };
-        rows.push(row);
-      }
-      row.parts.push({ x, value });
-    });
-    pages.push(rows
-      .sort((a, b) => b.y - a.y)
-      .map((row) => row.parts.sort((a, b) => a.x - b.x).map((part) => part.value).join(" "))
-      .join("\n"));
-  }
-  return cleanExtractedLawText(pages.join("\n\n"));
-}
-
-function applyExtractedLawText(text) {
-  const clean = cleanExtractedLawText(text);
-  applyLawMetadata(clean);
-  const articles = parseLawArticlesFromText(clean);
-  if (articles.length) {
-    renderLawArticles(articles);
-    toast(articles.length + " artigos extraidos para revisao.", "success");
-  } else {
-    renderLawArticles(clean ? [{ heading: "Texto extraido", text: clean }] : []);
-    toast("Texto extraido, mas os artigos nao foram identificados. Use + Artigo para cadastrar manualmente.", "warning");
-  }
-}
-
-async function handleLawPdfUpload(file) {
-  if (!file) return;
-  if (!/\.pdf$/i.test(file.name || "") && file.type !== "application/pdf") {
-    toast("Envie um arquivo PDF.", "warning");
-    return;
-  }
-  state.lawPdfFileName = file.name || "";
-  state.lawPdfFileSize = file.size || 0;
-  setLawUploadStatus("Salvando PDF original...", "info");
-  try {
-    const uploaded = await uploadFile(file);
-    const input = $("#legislacao-file_url");
-    if (input) input.value = uploaded.url || "";
-    updateUploadPreview("legislacao", "file_url");
-    setLawUploadStatus("PDF original preservado. Extraindo texto...", "success");
-  } catch (error) {
-    setLawUploadStatus("Falha ao salvar PDF original.", "error");
-    toast(error.message, "error");
-    return;
-  }
-
-  try {
-    const text = await extractTextFromPdf(file);
-    applyExtractedLawText(text);
-    setLawUploadStatus("PDF original salvo e artigos prontos para revisao.", "success");
-  } catch (error) {
-    console.warn(error);
-    setLawUploadStatus("PDF salvo. Extracao indisponivel; cadastre manualmente.", "warning");
-    toast("PDF salvo. A leitura automatica falhou, mas voce pode adicionar os artigos manualmente.", "warning");
-  }
-}
-
-function handleLawPdfDrop(event) {
-  event.preventDefault();
-  const zone = event.currentTarget;
-  if (zone) zone.classList.remove("drag");
-  const file = event.dataTransfer && event.dataTransfer.files ? event.dataTransfer.files[0] : null;
-  handleLawPdfUpload(file);
-}
-
-function hydrateLawEditor(row = {}) {
-  state.lawPdfFileName = "";
-  state.lawPdfFileSize = 0;
-  setLawUploadStatus(row.file_url ? "PDF original ja vinculado a este cadastro." : "", row.file_url ? "success" : "info");
-  const parsed = parseLawArticlesFromText(row.content || "");
-  if (parsed.length) {
-    renderLawArticles(parsed);
-  } else if (String(row.content || "").trim()) {
-    renderLawArticles([{ heading: "Texto da lei", text: String(row.content || "").trim() }]);
-  } else {
-    renderLawArticles([]);
-  }
-}
-
 async function submitCrud(key) {
   const cfg = crud[key];
   const id = $(`#${key}-id`).value;
@@ -1093,8 +742,7 @@ async function submitCrud(key) {
   }
   if (id && key === "usuarios" && !payload.password) delete payload.password;
   if (key === "legislacao") {
-    payload.content = composeLawContent(collectLawArticles());
-    payload.title = `${payload.law_type || "Ato Normativo"} No. ${payload.law_number || ""}`.trim();
+    payload.title = `${payload.law_type || "Ato Normativo"} Nº ${payload.law_number || ""}`.trim();
   }
   await api(endpointFor(key) + (id ? "?id=" + encodeURIComponent(id) : ""), {
     method: id ? "PUT" : "POST",
@@ -1249,9 +897,8 @@ function previewLaw() {
   const type = $("#legislacao-law_type")?.value || "";
   const summary = $("#legislacao-summary")?.value || "";
   const related = $("#legislacao-related_laws")?.value || "";
-  const content = composeLawContent(collectLawArticles()) || $("#legislacao-content")?.value || "";
-  const fileUrl = $("#legislacao-file_url")?.value || "";
-  const text = `${type} No. ${number}\n\nEMENTA: ${summary}\n\nVINCULACOES: ${related || "-"}\n\nPDF ORIGINAL: ${fileUrl || "Nao anexado"}\n\n${content}`.trim();
+  const content = $("#legislacao-content")?.value || "";
+  const text = `${type} Nº ${number}\n\nEMENTA: ${summary}\n\nVINCULACOES: ${related || "-"}\n\n${content}`.trim();
   const win = window.open("", "_blank");
   if (!win) return toast("Permita pop-ups para abrir o preview.", "warning");
   win.document.write(`<pre style="font-family:Arial,sans-serif;white-space:pre-wrap;line-height:1.6;padding:28px">${esc(text)}</pre>`);
@@ -1323,12 +970,6 @@ window.openMo = openMo;
 window.closeMo = closeMo;
 window.saveSettings = saveSettings;
 window.handleUpload = handleUpload;
-window.handleLawPdfUpload = handleLawPdfUpload;
-window.handleLawPdfDrop = handleLawPdfDrop;
-window.addLawArticle = addLawArticle;
-window.removeLawArticle = removeLawArticle;
-window.moveLawArticle = moveLawArticle;
-window.syncLawArticles = syncLawArticles;
 window.updateUploadPreview = updateUploadPreview;
 window.setFilter = setFilter;
 window.previewLaw = previewLaw;
