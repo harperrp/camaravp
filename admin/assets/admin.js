@@ -514,6 +514,31 @@ function statusBadge(value) {
   return `<span class="sp ${ok ? "sp-ok" : warn ? "sp-pend" : "sp-err"}">${esc(label)}</span>`;
 }
 
+function lawStatusKey(value) {
+  const status = String(value || "published").toLowerCase();
+  if (["published", "publicado", "vigente"].includes(status)) return "published";
+  if (["draft", "rascunho"].includes(status)) return "draft";
+  if (["archived", "arquivado", "revogada"].includes(status)) return "archived";
+  if (["alterada", "altered"].includes(status)) return "alterada";
+  return status;
+}
+
+function lawStatusMeta(value) {
+  const status = lawStatusKey(value);
+  const map = {
+    published: ["Vigente", "sp-ok"],
+    draft: ["Rascunho", "sp-pend"],
+    archived: ["Revogada / Arquivada", "sp-err"],
+    alterada: ["Alterada", "sp-pend"],
+  };
+  return map[status] || [value || "-", "sp-pend"];
+}
+
+function lawStatusBadge(value) {
+  const [label, cls] = lawStatusMeta(value);
+  return `<span class="sp ${cls}">${esc(label)}</span>`;
+}
+
 function partyBadge(value) {
   if (!value) return "-";
   return `<span class="sp sp-party">${esc(value)}</span>`;
@@ -535,7 +560,8 @@ function rowAvatar(row, key) {
 }
 
 function filteredRows(key, rows) {
-  const query = normalizeSearch(state.filters[key] || "");
+  const filter = state.filters[key];
+  const query = normalizeSearch(typeof filter === "object" ? filter.search : filter || "");
   if (!query) return rows;
   return rows.filter((row) => normalizeSearch(Object.values(row).join(" ")).includes(query));
 }
@@ -567,6 +593,19 @@ function tableFor(key, rows, compact = false) {
 }
 
 function moduleStats(key, rows) {
+  if (key === "legislacao") {
+    const vigente = rows.filter((row) => lawStatusKey(row.status) === "published").length;
+    const rascunho = rows.filter((row) => lawStatusKey(row.status) === "draft").length;
+    const revogada = rows.filter((row) => lawStatusKey(row.status) === "archived").length;
+    return `
+      <div class="mini-stats" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+        <div><strong>${rows.length}</strong><span>Total</span></div>
+        <div><strong>${vigente}</strong><span>Vigente</span></div>
+        <div><strong>${rascunho}</strong><span>Rascunho</span></div>
+        <div><strong>${revogada}</strong><span>Revogada</span></div>
+      </div>
+    `;
+  }
   const published = rows.filter((row) => ["published", "publicado"].includes(String(row.status || "").toLowerCase()) || Number(row.active) === 1).length;
   const draft = rows.filter((row) => ["draft", "rascunho", "novo"].includes(String(row.status || "").toLowerCase())).length;
   return `
@@ -578,7 +617,127 @@ function moduleStats(key, rows) {
   `;
 }
 
+function lawFilterState() {
+  const current = state.filters.legislacao;
+  if (!current || typeof current === "string") {
+    state.filters.legislacao = { search: typeof current === "string" ? current : "", type: "", status: "" };
+  }
+  return state.filters.legislacao;
+}
+
+function lawTypeOptions(rows) {
+  const field = crud.legislacao.fields.find(([name]) => name === "law_type");
+  const configured = (field && field[4] ? field[4].map(([value]) => value) : []);
+  const used = rows.map((row) => row.law_type).filter(Boolean);
+  return Array.from(new Set([...configured, ...used]));
+}
+
+function filterLawRows(rows) {
+  const filters = lawFilterState();
+  const query = normalizeSearch(filters.search || "");
+  return rows.filter((row) => {
+    const haystack = normalizeSearch([row.law_number, row.law_type, row.summary, row.title].join(" "));
+    const status = lawStatusKey(row.status);
+    return (!query || haystack.includes(query))
+      && (!filters.type || row.law_type === filters.type)
+      && (!filters.status || status === filters.status);
+  });
+}
+
+function lawFiltersHtml(rows) {
+  const filters = lawFilterState();
+  const types = lawTypeOptions(rows);
+  const statuses = [
+    ["", "Todas as situacoes"],
+    ["published", "Vigente"],
+    ["draft", "Rascunho"],
+    ["archived", "Revogada / Arquivada"],
+  ];
+  return `
+    <div class="tf" style="display:grid;grid-template-columns:minmax(190px,1.5fr) minmax(150px,1fr) minmax(160px,1fr);gap:8px;min-width:min(720px,100%)">
+      <input class="fc search" value="${esc(filters.search || "")}" placeholder="Buscar por numero, tipo ou ementa..." oninput="setLawFilter('search', this.value)">
+      <select class="fc" onchange="setLawFilter('type', this.value)">
+        <option value="">Todos os tipos</option>
+        ${types.map((type) => `<option value="${esc(type)}"${filters.type === type ? " selected" : ""}>${esc(type)}</option>`).join("")}
+      </select>
+      <select class="fc" onchange="setLawFilter('status', this.value)">
+        ${statuses.map(([value, label]) => `<option value="${esc(value)}"${filters.status === value ? " selected" : ""}>${esc(label)}</option>`).join("")}
+      </select>
+    </div>
+  `;
+}
+
+function lawTableFor(rows) {
+  const filtered = filterLawRows(rows);
+  if (!filtered.length) return `<div class="panel-note">Nenhum ato encontrado com os filtros atuais.</div>`;
+  return `
+    <table>
+      <thead>
+        <tr><th>Numero</th><th>Tipo</th><th>Ementa</th><th>Data</th><th>Situacao</th><th>PDF</th><th>Acoes</th></tr>
+      </thead>
+      <tbody>
+        ${filtered.map((row) => {
+          const fileUrl = row.file_url ? assetUrl(row.file_url) : "";
+          return `
+            <tr>
+              <td class="tc">${esc(row.law_number || row.title || row.id || "-")}</td>
+              <td>${esc(row.law_type || "Ato Normativo")}</td>
+              <td><div style="max-width:520px;line-height:1.5;color:var(--txt2)">${esc(row.summary || row.title || "-")}</div></td>
+              <td>${dateBR(row.publication_date)}</td>
+              <td>${lawStatusBadge(row.status)}</td>
+              <td>${fileUrl ? `<button class="btn btn-s btn-sm" onclick="openAsset('${esc(fileUrl)}')">Abrir PDF</button>` : `<span style="color:var(--txt3);font-size:12px">Sem PDF</span>`}</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-s btn-sm" onclick="openCrudModal('legislacao', ${Number(row.id)})">Editar</button>
+                  <button class="btn btn-d btn-sm" onclick="removeCrud('legislacao', ${Number(row.id)})">Excluir</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderLawTable() {
+  const target = $("#legislacao-table-area");
+  if (target) target.innerHTML = lawTableFor(state.data.legislacao || []);
+}
+
+function setLawFilter(name, value) {
+  const filters = lawFilterState();
+  filters[name] = value;
+  renderLawTable();
+}
+
+async function renderLawCrud() {
+  const cfg = crud.legislacao;
+  const rows = await safeLoad("legislacao", () => loadCrud("legislacao"));
+  updateBadges();
+  $("#view").innerHTML = `
+    <div class="ph">
+      <div><h1>${esc(cfg.title)} <em></em></h1><p>${esc(cfg.subtitle)}</p></div>
+      <button class="btn btn-p" onclick="openCrudModal('legislacao')">Cadastrar</button>
+    </div>
+    ${moduleStats("legislacao", rows)}
+    <div class="notice ok"><strong>Controle manual.</strong><span> Use o campo Vinculacoes para registrar relacoes entre leis; a situacao continua sendo revisada e marcada manualmente nesta etapa.</span></div>
+    <div class="tw">
+      <div class="th" style="align-items:flex-end">
+        <div>
+          <div class="tt">Instrumentos Normativos</div>
+          <div style="margin-top:4px;color:var(--txt3);font-size:12px">Busca por numero, tipo e ementa, com filtros de tipo e situacao.</div>
+        </div>
+        ${lawFiltersHtml(rows)}
+      </div>
+      <div id="legislacao-table-area">${lawTableFor(rows)}</div>
+    </div>
+    ${modalCrud("legislacao")}
+  `;
+}
+
 async function renderCrud(key) {
+  if (key === "legislacao") return renderLawCrud();
   const cfg = crud[key];
   const rows = await safeLoad(key, () => loadCrud(key));
   updateBadges();
@@ -972,6 +1131,7 @@ window.saveSettings = saveSettings;
 window.handleUpload = handleUpload;
 window.updateUploadPreview = updateUploadPreview;
 window.setFilter = setFilter;
+window.setLawFilter = setLawFilter;
 window.previewLaw = previewLaw;
 window.openAsset = openAsset;
 
